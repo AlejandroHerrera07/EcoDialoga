@@ -97,7 +97,7 @@ export function StudentSidebar({
         <div className="px-4 pb-4">
           <button className="flex items-center gap-3 w-fit px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-full transition-all duration-200 shadow-sm border border-gray-100 hover:scale-[1.02] active:scale-[0.98]">
             <Icon name="add" size="md" className="text-teal-accent" />
-            <span className="text-sm font-medium">Nueva conversación</span>
+            <span className="text-sm font-medium">Mensaje de ayuda(Resumen)</span>
           </button>
         </div>
 
@@ -129,7 +129,7 @@ export function StudentSidebar({
           ) : (
             <div className="px-4 py-8 text-center">
               <Icon name="chat" className="text-gray-300 mx-auto mb-2" size="xl" />
-              <p className="text-sm text-gray-400">Aún no hay conversaciones</p>
+              <p className="text-sm text-gray-400">Mensajes de ayuda</p>
             </div>
           )}
         </div>

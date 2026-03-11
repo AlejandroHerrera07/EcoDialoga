@@ -59,7 +59,7 @@ def login(group_code: str, student_code: str) -> dict:
         # 2. Buscar el estudiante y validar que pertenezca a ese grupo
         student_res = (
             supabase.table("estudiantes")
-            .select("identificador_estudiante, nombre_anonimo")
+            .select("identificador_estudiante, nombre_anonimo, consentimiento")
             .eq("identificador_estudiante", student_code)
             .eq("grupo_id", grupo_db_id)
             .execute()
@@ -70,6 +70,7 @@ def login(group_code: str, student_code: str) -> dict:
         
         estudiante = student_res.data[0]
         nombre = estudiante["nombre_anonimo"]
+        consentimiento = estudiante.get("consentimiento", False)
         
         # 3. CREAR EL REGISTRO DE SESIÓN (Crucial para vincular interacciones)
         # Esto evita el error de 'null value in column sesion_id'
@@ -93,10 +94,13 @@ def login(group_code: str, student_code: str) -> dict:
         return {
             "token": token,
             "user": {
+                "id": student_code,
                 "studentCode": student_code,
                 "groupCode": grupo_code_val,
-                "nombreEstudiante": nombre,
-                "sesionId": sesion_id  # Lo enviamos para que el front lo use
+                "name": nombre,
+                "role": "student",
+                "sesionId": sesion_id,  # Lo enviamos para que el front lo use
+                "consentimiento": consentimiento
             },
         }
     
@@ -121,7 +125,7 @@ def get_user_from_token(authorization_header: str) -> dict:
         # Obtener datos del estudiante usando el código del payload
         student_res = (
             supabase.table("estudiantes")
-            .select("nombre_anonimo, identificador_estudiante")
+            .select("nombre_anonimo, identificador_estudiante, consentimiento")
             .eq("identificador_estudiante", payload["student_code"])
             .single()
             .execute()
@@ -130,10 +134,13 @@ def get_user_from_token(authorization_header: str) -> dict:
         student = student_res.data
         
         return {
+            "id": student["identificador_estudiante"],
             "name": student["nombre_anonimo"],
             "studentCode": student["identificador_estudiante"],
             "groupCode": payload["group_code"],
-            "sesion_id": payload["sesion_id"], # Ahora el usuario lleva su sesion_id siempre
+            "role": "student",
+            "sesion_id": payload["sesion_id"],  # Ahora el usuario lleva su sesion_id siempre
+            "consentimiento": student.get("consentimiento", False)
         }
     
     except Exception as e:

@@ -133,7 +133,7 @@ function LoginContent() {
             </h1>
           </div>
           <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-md">
-            Tu aula inteligente impulsada por la naturaleza y la IA. Conéctate
+            Tu asesora educativa ambiental especialista en proyectos interdisciplinarios. Conéctate
             para empezar tu aventura de aprendizaje hoy.
           </p>
           {/* Feature Badges */}

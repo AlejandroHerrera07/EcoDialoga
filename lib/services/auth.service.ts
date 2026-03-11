@@ -79,3 +79,9 @@ export async function getMe(): Promise<User> {
   if (USE_MOCK) return mockGetMe();
   return apiClient.get<User>(API_ENDPOINTS.ME);
 }
+
+export async function updateConsent(consentimiento: boolean): Promise<void> {
+  if (!USE_MOCK) {
+    await apiClient.put("/auth/consent", { consentimiento });
+  }
+}

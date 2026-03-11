@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { StudentSidebar } from "@/app/components/layout";
 import { Icon } from "@/app/components/ui";
 import { useAuth, useConversations } from "@/lib/hooks";
+import { ConsentModal } from "@/app/components/ConsentModal";
+import * as authService from "@/lib/services/auth.service";
 
 export default function StudentLayout({
   children,
@@ -12,9 +14,34 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showConsentModal, setShowConsentModal] = useState(false);
   const { user, logout } = useAuth();
   const { conversations, isLoading: isLoadingConversations } = useConversations();
   const router = useRouter();
+
+  // Verificar si necesita mostrar el modal de consentimiento
+  useEffect(() => {
+    if (user && user.consentimiento === false) {
+      setShowConsentModal(true);
+    }
+  }, [user]);
+
+  const handleConsentAccept = async () => {
+    try {
+      await authService.updateConsent(true);
+      setShowConsentModal(false);
+      // El usuario ya está autenticado, así que continúa normalmente
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+      console.error("Error al aceptar consentimiento:", errorMsg);
+      alert("Error al guardar tu consentimiento. Por favor, intenta de nuevo.");
+    }
+  };
+
+  const handleConsentReject = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -29,6 +56,12 @@ export default function StudentLayout({
 
   return (
     <div className="h-screen flex overflow-hidden bg-white text-gray-800 relative">
+      {showConsentModal && (
+        <ConsentModal
+          onAccept={handleConsentAccept}
+          onReject={handleConsentReject}
+        />
+      )}
       <StudentSidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}

@@ -21,6 +21,7 @@ export interface User {
   groupCode: string;
   role: "student" | "teacher";
   avatarUrl?: string;
+  consentimiento?: boolean;
 }
 
 export interface AuthState {

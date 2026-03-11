@@ -90,6 +90,41 @@ def logout_handler(user=None):
         "message": "Sesión cerrada correctamente"
     })
 
+@app.route('/auth/consent', methods=['PUT'])
+@require_auth
+def update_consent_handler(user=None):
+    """
+    Endpoint para actualizar el estado de consentimiento del estudiante.
+    Body: { "consentimiento": boolean }
+    """
+    try:
+        data = request.json
+        consentimiento = data.get("consentimiento")
+        
+        if consentimiento is None:
+            return jsonify({
+                "status": "error",
+                "message": "consentimiento es requerido"
+            }), 400
+        
+        # Actualizar en la tabla estudiantes
+        student_code = user["studentCode"]
+        result = supabase.table("estudiantes").update({
+            "consentimiento": consentimiento
+        }).eq("identificador_estudiante", student_code).execute()
+        
+        if not result.data:
+            raise ValueError("No se pudo actualizar el consentimiento del estudiante")
+        
+        return jsonify({
+            "status": "success",
+            "message": "Consentimiento actualizado",
+            "consentimiento": consentimiento
+        })
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # ─────────────────────────────────────────────
 # CHAT ENDPOINTS
 # ─────────────────────────────────────────────
