@@ -133,7 +133,7 @@ function LoginContent() {
             </h1>
           </div>
           <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-md">
-            Tu asesora educativa ambiental especialista en proyectos interdisciplinarios. Conéctate
+            Tu asesora educativa ambiental impulsada por IA. Conéctate
             para empezar tu aventura de aprendizaje hoy.
           </p>
           {/* Feature Badges */}
