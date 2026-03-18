@@ -6,6 +6,7 @@ import { StudentSidebar } from "@/app/components/layout";
 import { Icon } from "@/app/components/ui";
 import { useAuth, useConversations } from "@/lib/hooks";
 import { ConsentModal } from "@/app/components/ConsentModal";
+import { ChatProvider } from "@/lib/contexts/ChatContext";
 import * as authService from "@/lib/services/auth.service";
 
 export default function StudentLayout({
@@ -55,32 +56,34 @@ export default function StudentLayout({
   }));
 
   return (
-    <div className="h-screen flex overflow-hidden bg-white text-gray-800 relative">
-      {showConsentModal && (
-        <ConsentModal
-          onAccept={handleConsentAccept}
-          onReject={handleConsentReject}
+    <ChatProvider>
+      <div className="h-screen flex overflow-hidden bg-white text-gray-800 relative">
+        {showConsentModal && (
+          <ConsentModal
+            onAccept={handleConsentAccept}
+            onReject={handleConsentReject}
+          />
+        )}
+        <StudentSidebar
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          conversations={sidebarConversations}
+          isLoadingConversations={isLoadingConversations}
+          userName={user?.name}
+          userCode={user?.studentCode}
+          onLogout={handleLogout}
         />
-      )}
-      <StudentSidebar
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        conversations={sidebarConversations}
-        isLoadingConversations={isLoadingConversations}
-        userName={user?.name}
-        userCode={user?.studentCode}
-        onLogout={handleLogout}
-      />
-      {!sidebarOpen && (
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="absolute top-4 left-4 z-20 p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
-          aria-label="Abrir historial"
-        >
-          <Icon name="menu" />
-        </button>
-      )}
-      {children}
-    </div>
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="absolute top-4 left-4 z-20 p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+            aria-label="Abrir historial"
+          >
+            <Icon name="menu" />
+          </button>
+        )}
+        {children}
+      </div>
+    </ChatProvider>
   );
 }

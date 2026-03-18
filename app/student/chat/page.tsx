@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { Icon } from "@/app/components/ui";
 import { ChatMessage, ChatInput } from "@/app/components/chat";
 import { useAuth, useChat, useConversations } from "@/lib/hooks";
+import { useRegisterSendMessage } from "@/lib/contexts/ChatContext";
 
 export default function StudentChatPage() {
   const { user } = useAuth();
@@ -18,6 +19,9 @@ export default function StudentChatPage() {
     loadMessages,
     clearError,
   } = useChat();
+
+  // Register sendMessage with the context
+  useRegisterSendMessage(sendMessage);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const greetingRef = useRef<HTMLDivElement>(null);

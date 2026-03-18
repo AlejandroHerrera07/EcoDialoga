@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/app/components/ui";
+import { useChatContext } from "@/lib/contexts/ChatContext";
 
 interface ConversationItem {
   id: string;
@@ -20,6 +21,8 @@ interface StudentSidebarProps {
   userName?: string;
   userCode?: string;
   onLogout?: () => void;
+  onSendSummaryMessage?: () => void;
+  onSendTemplateMessage?: () => void;
 }
 
 export function StudentSidebar({
@@ -31,9 +34,30 @@ export function StudentSidebar({
   userName = "Estudiante",
   userCode,
   onLogout,
+  onSendSummaryMessage,
+  onSendTemplateMessage,
 }: StudentSidebarProps) {
   const sidebarRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const { sendMessage } = useChatContext();
+
+  const handleSendSummaryMessage = async () => {
+    if (sendMessage) {
+      await sendMessage(
+        "Por favor, proporciona un resumen de nuestra conversación hasta ahora."
+      );
+    }
+    onSendSummaryMessage?.();
+  };
+
+  const handleSendTemplateMessage = async () => {
+    if (sendMessage) {
+      await sendMessage(
+        "Por favor genera una lista de los items del Anexo 10 con base en nuestra conversación hasta ahora."
+      );
+    }
+    onSendTemplateMessage?.();
+  };
 
   useEffect(() => {
     if (sidebarRef.current && contentRef.current) {
@@ -89,15 +113,26 @@ export function StudentSidebar({
             <Icon name="menu" />
           </button>
           <div className="flex items-center gap-2">
-<span className="text-sm font-semibold text-gray-700">EcoDialoga</span>
+            <span className="text-sm font-semibold text-gray-700">EcoDialoga</span>
           </div>
         </div>
 
         {/* New Conversation Button */}
         <div className="px-4 pb-4">
-          <button className="flex items-center gap-3 w-fit px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-full transition-all duration-200 shadow-sm border border-gray-100 hover:scale-[1.02] active:scale-[0.98]">
+          <button 
+            onClick={handleSendSummaryMessage}
+            className="flex items-center gap-3 w-fit px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-full transition-all duration-200 shadow-sm border border-gray-100 hover:scale-[1.02] active:scale-[0.98]">
             <Icon name="add" size="md" className="text-teal-accent" />
             <span className="text-sm font-medium">Mensaje de ayuda(Resumen)</span>
+          </button>
+        </div>
+
+        <div className="px-4 pb-4">
+          <button 
+            onClick={handleSendTemplateMessage}
+            className="flex items-center gap-3 w-fit px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-full transition-all duration-200 shadow-sm border border-gray-100 hover:scale-[1.02] active:scale-[0.98]">
+            <Icon name="add" size="md" className="text-teal-accent" />
+            <span className="text-sm font-medium">Items de plantilla</span>
           </button>
         </div>
 
