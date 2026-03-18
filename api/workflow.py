@@ -96,17 +96,17 @@ def process_ai_response(user_message, supabase, grupo_id):
 
     try:
 
-        # 1️⃣ HISTORIAL DESDE LA BASE DE DATOS
+        # HISTORIAL DESDE LA BASE DE DATOS
         last_messages = fetch_last_messages(supabase, grupo_id, 10)
 
-        # 2️⃣ ARMAR CONTEXTO
+        # ARMAR CONTEXTO
         messages = (
             [{"role": "system", "content": ECODIALOGA_INSTRUCTIONS}]
             + last_messages
             + [{"role": "user", "content": user_message}]
         )
 
-        # 3️⃣ LLAMADA AL MODELO + VECTOR STORE
+        # LLAMADA AL MODELO + VECTOR STORE
         response = client.responses.create(
             model=AGENT_MODEL,
 
@@ -120,7 +120,7 @@ def process_ai_response(user_message, supabase, grupo_id):
             ]
         )
 
-        # 4️⃣ EXTRAER RESPUESTA
+        # EXTRAER RESPUESTA
         ai_text = response.output_text
 
         return ai_text
