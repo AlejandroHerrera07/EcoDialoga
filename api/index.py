@@ -172,6 +172,89 @@ def chat_handler(user=None):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # ─────────────────────────────────────────────
+# GRUPOS ENDPOINTS
+# ─────────────────────────────────────────────
+
+@app.route('/grupos', methods=['GET'])
+@require_auth
+def get_group_info(user=None):
+    """
+    Endpoint para obtener información del grupo.
+    Query params: codigo={group_code}
+    """
+    try:
+        codigo = request.args.get('codigo')
+        
+        if not codigo:
+            return jsonify({
+                "status": "error",
+                "message": "Parámetro 'codigo' es requerido"
+            }), 400
+        
+        # Obtener grupo de Supabase
+        result = supabase.table("grupos").select("*").eq("codigo_grupo", codigo).execute()
+        
+        if not result.data or len(result.data) == 0:
+            return jsonify([])  # Retornar array vacío si no existe
+        
+        return jsonify(result.data)
+    
+    except Exception as e:
+        print(f"Error en get_group_info: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/grupos/<codigo>', methods=['PATCH'])
+@require_auth
+def update_group_info(codigo, user=None):
+    """
+    Endpoint para actualizar información del grupo.
+    Body: {
+        "area_curricular": string,
+        "eje_ambiental": string,
+        "problematica": string,
+        "grado": number
+    }
+    """
+    try:
+        data = request.json
+        
+        # Validar que el usuario pertenece al grupo
+        if user.get("groupCode") != codigo:
+            return jsonify({
+                "status": "error",
+                "message": "No tienes permiso para actualizar este grupo"
+            }), 403
+        
+        # Actualizar grupo en Supabase
+        update_data = {
+            "area_curricular": data.get("area_curricular"),
+            "eje_ambiental": data.get("eje_ambiental"),
+            "problematica": data.get("problematica"),
+            "grado": int(data.get("grado")) if data.get("grado") else None
+        }
+        
+        # Log para debugging
+        print(f"Actualizando grupo {codigo} con datos: {update_data}")
+        
+        result = supabase.table("grupos").update(update_data).eq("codigo_grupo", codigo).execute()
+        
+        if not result.data or len(result.data) == 0:
+            return jsonify({
+                "status": "error",
+                "message": "No se encontró el grupo para actualizar"
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "message": "Información del grupo actualizada correctamente",
+            "data": result.data
+        })
+    
+    except Exception as e:
+        print(f"Error en update_group_info: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# ─────────────────────────────────────────────
 # HEALTH CHECK
 # ─────────────────────────────────────────────
 

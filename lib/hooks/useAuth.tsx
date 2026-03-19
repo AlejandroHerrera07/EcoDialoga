@@ -26,6 +26,7 @@ import { removeStoredToken } from "@/lib/api";
 interface AuthContextValue extends AuthState {
   login: (payload: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -121,6 +122,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const freshUser = await authService.getMe();
+      setUser(freshUser);
+      persistUser(freshUser);
+    } catch (error) {
+      console.error("Error refreshing user:", error);
+    }
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -129,8 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
+      refreshUser,
     }),
-    [user, token, isLoading, login, logout],
+    [user, token, isLoading, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
