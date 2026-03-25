@@ -24,6 +24,14 @@ export default function StudentLayout({
   const { conversations, isLoading: isLoadingConversations } = useConversations();
   const router = useRouter();
 
+  // Protección de ruta: validar que el usuario sea estudiante
+  useEffect(() => {
+    if (user && user.role !== "student") {
+      // Usuario no es estudiante - redirigir al dashboard correspondiente
+      router.replace(user.role === "teacher" ? "/teacher/dashboard" : "/login");
+    }
+  }, [user, router]);
+
   // Verificar consentimiento y datos del grupo
   useEffect(() => {
     if (!user) return;

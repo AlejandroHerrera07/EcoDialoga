@@ -3,16 +3,24 @@
 import { useAuth } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { TeacherSidebar, TeacherMobileHeader } from "@/app/components/layout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TeacherLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Protección de ruta: validar que el usuario sea profesor
+  useEffect(() => {
+    if (user && user.role !== "teacher") {
+      // Usuario no es profesor - redirigir al dashboard correspondiente
+      router.replace(user.role === "student" ? "/student/chat" : "/login");
+    }
+  }, [user, router]);
 
   const handleLogout = async () => {
     try {

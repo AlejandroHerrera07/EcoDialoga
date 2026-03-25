@@ -24,7 +24,7 @@ export default function LoginPage() {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
 
   // Form state
   const [groupCode, setGroupCode] = useState("");
@@ -38,11 +38,20 @@ function LoginContent() {
 
   // Redirect if already authenticated (wait until hydration finishes)
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      const redirect = searchParams.get("redirect") ?? "/student/chat";
+    if (!authLoading && isAuthenticated && user) {
+      // Determinar ruta basada en rol del usuario
+      let defaultRoute = "/student/chat"; // default fallback
+      if (user.role === "teacher") {
+        defaultRoute = "/teacher/dashboard";
+      } else if (user.role === "student") {
+        defaultRoute = "/student/chat";
+      }
+      
+      // Permitir override con parámetro 'redirect' en URL
+      const redirect = searchParams.get("redirect") ?? defaultRoute;
       router.replace(redirect);
     }
-  }, [isAuthenticated, authLoading, router, searchParams]);
+  }, [isAuthenticated, authLoading, user, router, searchParams]);
 
   // Form submit handler
   const handleSubmit = async (e: FormEvent) => {
