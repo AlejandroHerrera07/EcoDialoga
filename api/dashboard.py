@@ -172,25 +172,34 @@ def get_grupos_list(supabase: Client):
     Obtiene lista de todos los grupos disponibles.
     
     Returns:
-        List de grupos con id, codigo_grupo, y conteo de estudiantes
+        List de grupos con estructura esperada por el frontend
     """
     
     try:
-        grupos = supabase.table("grupos").select("id, codigo_grupo, area_curricular").execute().data
+        grupos_raw = supabase.table("grupos").select("id, codigo_grupo, area_curricular, eje_ambiental, problematica, grado").execute().data
         
-        return {
-            "status": "success",
-            "data": grupos,
-            "total": len(grupos)
-        }
+        # Mapear campos de BD a estructura que espera el frontend
+        grupos_formateados = []
+        for grupo in grupos_raw:
+            grupo_formateado = {
+                "id": grupo.get("id"),
+                "code": grupo.get("codigo_grupo"),  # Mapear codigo_grupo → code
+                "area": grupo.get("area_curricular", ""),
+                "eje": grupo.get("eje_ambiental", ""),
+                "macroEje": grupo.get("area_curricular", ""),  # Usar area_curricular como macroEje por defecto
+                "problematica": grupo.get("problematica", ""),
+                "icon": "science",  # Valores por defecto
+                "iconBg": "bg-blue-50",
+                "iconColor": "text-blue-600",
+                "status": "active"
+            }
+            grupos_formateados.append(grupo_formateado)
+        
+        return grupos_formateados
     
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e),
-            "data": [],
-            "total": 0
-        }
+        print(f"Error en get_grupos_list: {str(e)}")
+        return []
 
 
 # ─────────────────────────────────────────────────────────────

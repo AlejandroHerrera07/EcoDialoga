@@ -340,8 +340,7 @@ def get_groups(user=None):
     Endpoint para obtener lista de todos los grupos disponibles.
     
     Retorna:
-      - data: Array de grupos
-      - total: Número total de grupos
+      Array de grupos con estructura: { id, code, area, eje, macroEje, problematica, icon, iconBg, iconColor, status }
     """
     try:
         # Llamar función de dashboard
@@ -351,7 +350,7 @@ def get_groups(user=None):
     
     except Exception as e:
         print(f"Error en get_groups: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify([]), 500
 
 # ─────────────────────────────────────────────
 # HEALTH CHECK

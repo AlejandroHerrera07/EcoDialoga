@@ -88,7 +88,8 @@ export const getDashboardMetrics = async (
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_METRICS, "http://dummy.com");
-      if (groupCode && groupCode !== "Todos") url.searchParams.append("codigo_grupo", groupCode);
+      // Enviar parámetro codigo_grupo solo si se seleccionó un grupo específico (no vacío)
+      if (groupCode) url.searchParams.append("codigo_grupo", groupCode);
       if (fecha) url.searchParams.append("fecha", fecha);
       return await apiClient.get<DashboardMetricsResponse>(url.pathname + url.search);
     },
@@ -97,7 +98,7 @@ export const getDashboardMetrics = async (
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Simulamos la variacion de metricas según el groupCode aportado (si es null muestra la base)
-      const multiplier = groupCode ? (groupCode === "Todos" ? 1 : 0.6) : 1;
+      const multiplier = groupCode ? 0.6 : 1;
 
       return {
         status: "success",
@@ -165,14 +166,15 @@ export const getRecentMessages = async (
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_RECENT_MESSAGES, "http://dummy.com");
-      if (groupCode && groupCode !== "Todos") url.searchParams.append("codigo_grupo", groupCode);
+      // Enviar parámetro codigo_grupo solo si se seleccionó un grupo específico (no vacío)
+      if (groupCode) url.searchParams.append("codigo_grupo", groupCode);
       if (fecha) url.searchParams.append("fecha", fecha);
       return await apiClient.get<DashboardMessage[]>(url.pathname + url.search);
     },
     async () => {
       await new Promise((resolve) => setTimeout(resolve, 800));
       return MOCK_MESSAGES.filter(msg => 
-        (!groupCode || groupCode === "Todos" || msg.group === groupCode) && 
+        (!groupCode || msg.group === groupCode) && 
         (!fecha || msg.date === fecha)
       );
     }
