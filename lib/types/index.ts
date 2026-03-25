@@ -2,6 +2,7 @@
 // Domain Types — EcoDialoga
 // ─────────────────────────────────────────────
 
+export * from "./teacher";
 // ── Auth ──────────────────────────────────────
 
 export interface LoginRequest {
