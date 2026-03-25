@@ -10,17 +10,23 @@ export default function TeacherLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Protección de ruta: validar que el usuario sea profesor
+  // Solo redirigir después de que la autenticación haya hidratado correctamente
   useEffect(() => {
+    if (authLoading) return; // Esperar a que termine la hidratación
+    
     if (user && user.role !== "teacher") {
       // Usuario no es profesor - redirigir al dashboard correspondiente
       router.replace(user.role === "student" ? "/student/chat" : "/login");
+    } else if (!user) {
+      // Sin usuario - redirigir a login
+      router.replace("/login");
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleLogout = async () => {
     try {

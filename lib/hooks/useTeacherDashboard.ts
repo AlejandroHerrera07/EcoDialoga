@@ -19,7 +19,7 @@ export function useTeacherDashboard(filters?: DashboardFilters) {
         setIsLoading(true);
         const [metricsRes, messagesRes] = await Promise.all([
           teacherService.getDashboardMetrics(filters?.groupId, filters?.date),
-          teacherService.getRecentMessages()
+          teacherService.getRecentMessages(filters?.groupId, filters?.date)
         ]);
         setData(metricsRes);
         setMessages(messagesRes);

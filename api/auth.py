@@ -73,6 +73,11 @@ def login(group_code: str, student_code: str) -> dict:
         consentimiento = estudiante.get("consentimiento", False)
         rol = estudiante.get("rol")
         
+        # ✨ Validar que el rol sea válido, si no, asumir "student"
+        if not rol or rol not in ["student", "teacher"]:
+            print(f"Advertencia: Rol inválido '{rol}' para {student_code}. Usando 'student' por defecto.")
+            rol = "student"
+        
         # 3. CREAR EL REGISTRO DE SESIÓN (Crucial para vincular interacciones)
         # Esto evita el error de 'null value in column sesion_id'
         sesion_res = supabase.table("sesiones").insert({
@@ -92,17 +97,21 @@ def login(group_code: str, student_code: str) -> dict:
             sesion_id=sesion_id
         )
         
+        user_response = {
+            "id": student_code,
+            "studentCode": student_code,
+            "groupCode": grupo_code_val,
+            "name": nombre,
+            "role": rol,
+            "sesionId": sesion_id,
+            "consentimiento": consentimiento
+        }
+        
+        print(f"DEBUG login: Devolviendo usuario: {user_response}")
+        
         return {
             "token": token,
-            "user": {
-                "id": student_code,
-                "studentCode": student_code,
-                "groupCode": grupo_code_val,
-                "name": nombre,
-                "role": rol,
-                "sesionId": sesion_id,  # Lo enviamos para que el front lo use
-                "consentimiento": consentimiento
-            },
+            "user": user_response,
         }
     
     except Exception as e:
@@ -134,15 +143,25 @@ def get_user_from_token(authorization_header: str) -> dict:
         
         student = student_res.data
         
-        return {
+        # ✨ Validar que el rol sea válido, si no, asumir "student"
+        rol = student.get("rol")
+        if not rol or rol not in ["student", "teacher"]:
+            print(f"Advertencia: Rol inválido '{rol}' para {student['identificador_estudiante']}. Usando 'student' por defecto.")
+            rol = "student"
+        
+        user_data = {
             "id": student["identificador_estudiante"],
             "name": student["nombre_anonimo"],
             "studentCode": student["identificador_estudiante"],
             "groupCode": payload["group_code"],
-            "role": student["rol"],
-            "sesion_id": payload["sesion_id"],  # Ahora el usuario lleva su sesion_id siempre
+            "role": rol,
+            "sesion_id": payload["sesion_id"],
             "consentimiento": student.get("consentimiento", False)
         }
+        
+        print(f"DEBUG getMe: Devolviendo usuario: {user_data}")
+        
+        return user_data
     
     except Exception as e:
         raise ValueError(f"Token inválido: {str(e)}")

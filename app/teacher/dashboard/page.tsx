@@ -110,14 +110,26 @@ function AnimatedMetricCard({
   );
 }
 
-function QualityLineChart({ promedio }: { promedio: number }) {
+interface CalidadChartData {
+  name: string;
+  calidad: number;
+}
+
+function QualityLineChart({ promedio, calidadData }: { promedio: number; calidadData?: { nombre: string; promedio_calidad: number }[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const dataRef = useRef(Array.from({ length: 30 }, (_, i) => ({
-    name: `R ${i + 1}`,
-    // eslint-disable-next-line react-hooks/purity
-    calidad: Number((Math.random() * 2).toFixed(2))
-  })));
+  // Transformar datos del backend al formato esperado por el chart
+  const dataRef = useRef<CalidadChartData[]>(
+    calidadData && calidadData.length > 0
+      ? calidadData.map((item, i) => ({
+          name: `R ${i + 1}`,
+          calidad: item.promedio_calidad
+        }))
+      : Array.from({ length: 30 }, (_, i) => ({
+          name: `R ${i + 1}`,
+          calidad: 0
+        }))
+  );
 
   const data = dataRef.current;
 
@@ -421,7 +433,10 @@ export default function TeacherDashboardPage() {
 
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[250px] sm:min-h-[350px] lg:min-h-[400px]">
-                <QualityLineChart promedio={metrics.Promedio_calidad} />
+                <QualityLineChart 
+                  promedio={metrics.Promedio_calidad}
+                  calidadData={metrics.calidad_promedio_data}
+                />
                 <AnimatedDonutChart 
                   functionData={metrics.Cada_funcion} 
                   totalInteractions={metrics.Cada_funcion.reduce((acc, curr) => acc + curr.value, 0)} 

@@ -20,17 +20,23 @@ export default function StudentLayout({
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
   const [hasCheckedGroupInfo, setHasCheckedGroupInfo] = useState(false);
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, isLoading: authLoading } = useAuth();
   const { conversations, isLoading: isLoadingConversations } = useConversations();
   const router = useRouter();
 
   // Protección de ruta: validar que el usuario sea estudiante
+  // Solo redirigir después de que la autenticación haya hidratado correctamente
   useEffect(() => {
+    if (authLoading) return; // Esperar a que termine la hidratación
+    
     if (user && user.role !== "student") {
       // Usuario no es estudiante - redirigir al dashboard correspondiente
       router.replace(user.role === "teacher" ? "/teacher/dashboard" : "/login");
+    } else if (!user) {
+      // Sin usuario - redirigir a login
+      router.replace("/login");
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   // Verificar consentimiento y datos del grupo
   useEffect(() => {

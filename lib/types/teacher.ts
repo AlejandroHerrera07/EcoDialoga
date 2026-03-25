@@ -6,6 +6,11 @@ export interface FunctionMetric {
   hex: string;
 }
 
+export interface CalidadData {
+  nombre: string;
+  promedio_calidad: number;
+}
+
 export interface DashboardMetricsResponse {
   status: string;
   inter_total: number;
@@ -17,6 +22,7 @@ export interface DashboardMetricsResponse {
   calidad_1: number;
   calidad_2: number;
   Promedio_calidad: number;
+  calidad_promedio_data?: CalidadData[];
 }
 
 export interface DashboardMessage {

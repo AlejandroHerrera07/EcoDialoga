@@ -4,6 +4,7 @@ from flask_cors import CORS
 from database import get_supabase_client, save_interaction
 from workflow import process_ai_response
 from auth import login as auth_login, get_user_from_token
+from dashboard import get_dashboard_metrics, get_recent_messages, get_grupos_list
 
 app = Flask(__name__)
 CORS(app)
@@ -55,10 +56,12 @@ def login_handler():
         # Validar contra Supabase
         result = auth_login(group_code, student_code)
         
+        # Devolver con estructura consistente: { data: { token, user } }
         return jsonify({
-            "status": "success",
-            "token": result["token"],
-            "user": result["user"]
+            "data": {
+                "token": result["token"],
+                "user": result["user"]
+            }
         })
     
     except ValueError as e:
@@ -74,8 +77,7 @@ def me_handler(user=None):
     Requiere Authorization header con JWT token.
     """
     return jsonify({
-        "status": "success",
-        "user": user
+        "data": user
     })
 
 @app.route('/auth/logout', methods=['POST'])
@@ -244,14 +246,111 @@ def update_group_info(codigo, user=None):
                 "message": "No se encontró el grupo para actualizar"
             }), 404
         
-        return jsonify({
-            "status": "success",
-            "message": "Información del grupo actualizada correctamente",
-            "data": result.data
-        })
+        return jsonify({"status": "success", "message": "Información del grupo actualizada correctamente", "data": result.data})
     
     except Exception as e:
         print(f"Error en update_group_info: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# ─────────────────────────────────────────────
+# DASHBOARD ENDPOINTS
+# ─────────────────────────────────────────────
+
+@app.route('/teacher/metrics', methods=['GET'])
+@require_auth
+def get_metrics(user=None):
+    """
+    Endpoint para obtener métricas del dashboard.
+    Query params (todos opcionales):
+      - codigo_grupo: string (ej: "ECO-2026-A")
+      - fecha_inicio: string (formato ISO: YYYY-MM-DD)
+      - fecha_fin: string (formato ISO: YYYY-MM-DD)
+    
+    Retorna:
+      - inter_total: Total de interacciones
+      - relev_prom: Promedio de relevancia (%)
+      - Promedio_calidad: Promedio de calidad (0-2)
+      - calidad_promedio_data: Array de últimas 30 respuestas con calidad
+      - Cada_funcion: Array con desglose por función utilizada
+      - total_relevantes: Número de interacciones relevantes
+      - Total_irrelevantes: Número de interacciones no relevantes
+      - calidad_0, calidad_1, calidad_2: Conteos por puntuación
+    """
+    try:
+        # Obtener parámetros de query
+        codigo_grupo = request.args.get('codigo_grupo')
+        fecha = request.args.get('fecha')
+        
+        # Llamar función de dashboard
+        metrics = get_dashboard_metrics(
+            supabase,
+            codigo_grupo=codigo_grupo,
+            fecha=fecha
+        )
+        
+        return jsonify(metrics), 200
+    
+    except Exception as e:
+        print(f"Error en get_metrics: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/teacher/recent-messages', methods=['GET'])
+@require_auth
+def get_messages(user=None):
+    """
+    Endpoint para obtener mensajes recientes del dashboard.
+    Query params (todos opcionales):
+      - codigo_grupo: string (ej: "ECO-2026-A")
+      - fecha_inicio: string (formato ISO: YYYY-MM-DD)
+      - fecha_fin: string (formato ISO: YYYY-MM-DD)
+      - limit: número (default: 50, max: 500)
+    
+    Retorna:
+      - data: Array de mensajes recientes
+      - total: Número total de mensajes
+    """
+    try:
+        # Obtener parámetros de query
+        codigo_grupo = request.args.get('codigo_grupo')
+        fecha = request.args.get('fecha')
+        limit = int(request.args.get('limit', 50))
+        
+        # Validar límite máximo
+        if limit > 500:
+            limit = 500
+        
+        # Llamar función de dashboard
+        messages = get_recent_messages(
+            supabase,
+            codigo_grupo=codigo_grupo,
+            fecha=fecha,
+            limit=limit
+        )
+        
+        return jsonify(messages), 200
+    
+    except Exception as e:
+        print(f"Error en get_messages: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/teacher/groups', methods=['GET'])
+@require_auth
+def get_groups(user=None):
+    """
+    Endpoint para obtener lista de todos los grupos disponibles.
+    
+    Retorna:
+      - data: Array de grupos
+      - total: Número total de grupos
+    """
+    try:
+        # Llamar función de dashboard
+        grupos = get_grupos_list(supabase)
+        
+        return jsonify(grupos), 200
+    
+    except Exception as e:
+        print(f"Error en get_groups: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # ─────────────────────────────────────────────

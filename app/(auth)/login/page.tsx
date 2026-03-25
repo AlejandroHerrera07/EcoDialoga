@@ -39,8 +39,16 @@ function LoginContent() {
   // Redirect if already authenticated (wait until hydration finishes)
   useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
+      // Validar que el rol sea válido (debe ser "student" o "teacher")
+      if (!user.role || !["student", "teacher"].includes(user.role)) {
+        const invalidRole = user.role ?? "undefined";
+        setError(`Error: rol de usuario inválido (${invalidRole}). Verifica tu base de datos o contacta al administrador.`);
+        console.error("Invalid role received:", { role: user.role, user });
+        return;
+      }
+
       // Determinar ruta basada en rol del usuario
-      let defaultRoute = "/student/chat"; // default fallback
+      let defaultRoute = "/student/chat";
       if (user.role === "teacher") {
         defaultRoute = "/teacher/dashboard";
       } else if (user.role === "student") {

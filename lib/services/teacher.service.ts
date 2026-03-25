@@ -82,22 +82,22 @@ const fallbackOnError = async <T>(apiCall: () => Promise<T>, mockFallback: () =>
 };
 
 export const getDashboardMetrics = async (
-  groupId?: string | null,
-  date?: string | null
+  groupCode?: string | null,
+  fecha?: string | null
 ): Promise<DashboardMetricsResponse> => {
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_METRICS, "http://dummy.com");
-      if (groupId && groupId !== "Todos") url.searchParams.append("groupId", groupId);
-      if (date) url.searchParams.append("date", date);
+      if (groupCode && groupCode !== "Todos") url.searchParams.append("codigo_grupo", groupCode);
+      if (fecha) url.searchParams.append("fecha", fecha);
       return await apiClient.get<DashboardMetricsResponse>(url.pathname + url.search);
     },
     async () => {
       // Simulación de delay de red
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Simulamos la variacion de metricas según el groupId aportado (si es null muestra la base)
-      const multiplier = groupId ? (groupId === "Todos" ? 1 : 0.6) : 1;
+      // Simulamos la variacion de metricas según el groupCode aportado (si es null muestra la base)
+      const multiplier = groupCode ? (groupCode === "Todos" ? 1 : 0.6) : 1;
 
       return {
         status: "success",
@@ -158,19 +158,22 @@ export const getDashboardMetrics = async (
   );
 };
 
-export const getRecentMessages = async (groupId?: string | null, date?: string | null): Promise<DashboardMessage[]> => {
+export const getRecentMessages = async (
+  groupCode?: string | null,
+  fecha?: string | null
+): Promise<DashboardMessage[]> => {
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_RECENT_MESSAGES, "http://dummy.com");
-      if (groupId && groupId !== "Todos") url.searchParams.append("groupId", groupId);
-      if (date) url.searchParams.append("date", date);
+      if (groupCode && groupCode !== "Todos") url.searchParams.append("codigo_grupo", groupCode);
+      if (fecha) url.searchParams.append("fecha", fecha);
       return await apiClient.get<DashboardMessage[]>(url.pathname + url.search);
     },
     async () => {
       await new Promise((resolve) => setTimeout(resolve, 800));
       return MOCK_MESSAGES.filter(msg => 
-        (!groupId || groupId === "Todos" || msg.group === groupId) && 
-        (!date || msg.date === date)
+        (!groupCode || groupCode === "Todos" || msg.group === groupCode) && 
+        (!fecha || msg.date === fecha)
       );
     }
   );
