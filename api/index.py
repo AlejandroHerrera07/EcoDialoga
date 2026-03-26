@@ -450,6 +450,11 @@ def export_download(user=None):
 # HEALTH CHECK
 # ─────────────────────────────────────────────
 
+@app.route('/', methods=['GET'])
+def root():
+    """Endpoint raíz."""
+    return jsonify({"status": "ok", "message": "EcoDialoga Backend está activo"}), 200
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Endpoint de health check para verificar que el servidor está activo."""
