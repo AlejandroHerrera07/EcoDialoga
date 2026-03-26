@@ -9,7 +9,18 @@
 
 import type { ApiError } from "@/lib/types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+// ─────────────────────────────────────────────
+// API Configuration
+// ─────────────────────────────────────────────
+// NEXT_PUBLIC_API_URL: URL del backend (ej: https://tu-backend-railway.up.railway.app)
+// En desarrollo: http://localhost:5000
+// En producción: tu-url-railway.up.railway.app
+export const API_BASE_URL = 
+  process.env.NEXT_PUBLIC_API_URL || 
+  process.env.API_URL || 
+  "http://localhost:5000";
+
+const BASE_URL = `${API_BASE_URL}`;
 
 // ── Token helpers (client‑side only) ──────────
 
