@@ -139,8 +139,8 @@ def chat_handler(user=None):
         data = request.json
         user_msg = data.get("content")
         sesion_id = user["sesion_id"]
-        group_code = user["groupCode"]  # Usar ID del usuario 
-        student_id = user["studentCode"]  # Usar ID del usuario
+        group_code = user["groupCode"]  
+        student_id = user["studentCode"]  
 
         # 1. Obtener la sesión para ver si ya tiene un thread_id
         sesion_data = supabase.table("grupos").select("thread_id").eq("codigo_grupo", group_code).single().execute()
@@ -152,18 +152,17 @@ def chat_handler(user=None):
         estudiante_res = supabase.table("estudiantes").select("id").eq("identificador_estudiante", student_id).single().execute()
         estudiante_id = estudiante_res.data.get("id")
         # 2. Guardar el mensaje del estudiante
-        res_user = save_interaction(supabase, sesion_id, "user", user_msg, estudiante_id,)
+        res_user = save_interaction(supabase, sesion_id, "user", user_msg, group_code, student_id=estudiante_id, student_code=student_id)
         pregunta_id = res_user.data[0]['id']
 
         # 3. Procesar con OpenAI Agent Builder
         #ai_text, """final_thread_id"""
-        ai_text = process_ai_response(user_msg, supabase, estudiante_id)
-        print("Ai text:", ai_text)
+        ai_text = process_ai_response(user_msg, supabase, group_code)
 
         #if not current_thread_id and final_thread_id:
         #    supabase.table("grupos").update({"thread_id": final_thread_id}).eq("codigo_grupo", group_code).execute()
         # 4. Guardar la respuesta de la IA vinculada a la pregunta
-        save_interaction(supabase, sesion_id, "assistant", ai_text, reply_to=pregunta_id)
+        save_interaction(supabase, sesion_id, "assistant", ai_text, group_code, reply_to=pregunta_id)
 
         return jsonify({
             "status": "success",

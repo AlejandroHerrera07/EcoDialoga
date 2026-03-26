@@ -60,51 +60,144 @@ ECODIALOGA_INSTRUCTIONS = """
 VECTOR_STORE_ID = os.environ.get("VECTOR_STORE_ID")
 
 # ---------------------------------------------------
+# Obtener información del grupo desde Supabase
+# ---------------------------------------------------
+
+def fetch_grupo_info(supabase, codigo_grupo):
+    """
+    Obtiene la información del grupo: área curricular, área transversal, 
+    eje ambiental, problemática y grado destinatario.
+    
+    Args:
+        supabase: Cliente de Supabase
+        codigo_grupo: Código del grupo (ej: "G1", "G0000", etc)
+    
+    Returns:
+        Dict con la info del grupo o None si no existe
+    """
+    try:
+        response = (
+            supabase.table("grupos")
+            .select("area_curricular, area_transversal, eje_ambiental, problematica, grado")
+            .eq("codigo_grupo", codigo_grupo)
+            .execute()
+        )
+        
+        if response.data and len(response.data) > 0:
+            return response.data[0]
+        return None
+    except Exception as e:
+        print(f"Error obteniendo info del grupo: {str(e)}")
+        return None
+
+
+def format_grupo_context(grupo_info):
+    """
+    Formatea la información del grupo en un mensaje de contexto.
+    """
+    if not grupo_info:
+        return None
+    
+    area_curricular = grupo_info.get("area_curricular", "No especificada")
+    area_transversal = grupo_info.get("area_transversal", "No especificada")
+    eje_ambiental = grupo_info.get("eje_ambiental", "No especificado")
+    problematica = grupo_info.get("problematica", "No especificada")
+    grado = grupo_info.get("grado", "No especificado")
+    
+    context_message = f"""
+**CONTEXTO DEL GRUPO:**
+- **Área Curricular Prioritaria:** {area_curricular}
+- **Área Transversal:** {area_transversal}
+- **Eje Ambiental:** {eje_ambiental}
+- **Problemática:** {problematica}
+- **Grado Destinatario de la Secuencia Didáctica:** {grado}
+
+Con base en este contexto, acompaña al grupo en el diseño de su secuencia didáctica.
+"""
+    
+    return context_message
+
+
+# ---------------------------------------------------
 # Obtener historial desde Supabase
 # ---------------------------------------------------
 
-def fetch_last_messages(supabase, grupo_id, limit=10):
+def fetch_last_messages(supabase, codigo_grupo, limit=10):
+    """
+    Obtiene los últimos mensajes de un grupo desde la tabla interacciones.
+    
+    Args:
+        supabase: Cliente de Supabase
+        codigo_grupo: Código del grupo (ej: "G1", "G0000", etc)
+        limit: Número máximo de mensajes
+    
+    Returns:
+        Lista de mensajes formateados para el modelo
+    """
+    try:
+        response = (
+            supabase.table("interacciones")
+            .select("rol, contenido")
+            .eq("codigo_grupo", codigo_grupo)
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
 
-    response = (
-        supabase.table("interacciones")
-        .select("rol, contenido")
-        .eq("estudiante_id", grupo_id)
-        .order("created_at", desc=True)
-        .limit(limit)
-        .execute()
-    )
+        messages = []
 
-    messages = []
+        if response.data:
+            for item in reversed(response.data):
+                messages.append({
+                    "role": item["rol"],
+                    "content": item["contenido"]
+                })
 
-    if response.data:
-
-        for item in reversed(response.data):
-
-            messages.append({
-                "role": item["rol"],
-                "content": item["contenido"]
-            })
-
-    return messages
+        return messages
+    except Exception as e:
+        print(f"Error obteniendo mensajes del grupo: {str(e)}")
+        return []
 
 
 # ---------------------------------------------------
 # Procesar mensaje del usuario
 # ---------------------------------------------------
 
-def process_ai_response(user_message, supabase, grupo_id):
+def process_ai_response(user_message, supabase, codigo_grupo):
+    """
+    Procesa un mensaje del usuario y retorna respuesta del modelo de IA.
+    
+    Args:
+        user_message: Mensaje del usuario
+        supabase: Cliente de Supabase
+        codigo_grupo: Código del grupo (ej: "G1", "G0000", etc)
+    
+    Returns:
+        Texto de respuesta del modelo
+    """
 
     try:
 
+        # OBTENER INFORMACIÓN DEL GRUPO
+        grupo_info = fetch_grupo_info(supabase, codigo_grupo)
+        grupo_context = format_grupo_context(grupo_info) if grupo_info else None
+
         # HISTORIAL DESDE LA BASE DE DATOS
-        last_messages = fetch_last_messages(supabase, grupo_id, 10)
+        last_messages = fetch_last_messages(supabase, codigo_grupo, 10)
 
         # ARMAR CONTEXTO
-        messages = (
-            [{"role": "system", "content": ECODIALOGA_INSTRUCTIONS}]
-            + last_messages
-            + [{"role": "user", "content": user_message}]
-        )
+        messages = [{"role": "system", "content": ECODIALOGA_INSTRUCTIONS}]
+        
+        # Agregar contexto del grupo si está disponible
+        if grupo_context:
+            messages.append({
+                "role": "assistant",
+                "content": grupo_context
+            })
+        
+        # Agregar historial y mensaje del usuario
+        messages.extend(last_messages)
+        messages.append({"role": "user", "content": user_message})
 
         # LLAMADA AL MODELO + VECTOR STORE
         response = client.responses.create(
