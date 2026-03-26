@@ -182,7 +182,7 @@ function LoginContent() {
                 <Icon name="eco" size="xl" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900">
-                Acceso Estudiantes
+                Acceso
               </h2>
               <p className="text-slate-500">Ingresa tus códigos de acceso</p>
             </div>
@@ -206,9 +206,9 @@ function LoginContent() {
                 autoComplete="off"
               />
               <Input
-                label="Código de Estudiante"
+                label="Código de Usuario"
                 icon="person"
-                placeholder="Tu código de estudiante aquí"
+                placeholder="Tu código de usuario aquí"
                 className="tracking-wide font-small"
                 value={studentCode}
                 onChange={(e) => setStudentCode(e.target.value.toUpperCase())}
