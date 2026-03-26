@@ -337,6 +337,17 @@ export default function TeacherDashboardPage() {
   const [msgDate, setMsgDate] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [filteredMessages, setFilteredMessages] = useState<DashboardMessage[]>([]);
+  
+  // DEBUG: Log filter state changes
+  useEffect(() => {
+    console.log(`[DASHBOARD] Filter state changed:`, {
+      panelGroup: panelGroup || 'ninguno',
+      panelDate: panelDate || 'ninguna',
+      isLoading,
+      hasError: !!error,
+      hasMetrics: !!metrics && metrics.inter_total > 0
+    });
+  }, [panelGroup, panelDate, isLoading, error, metrics]);
 
   const handleSearchMessages = () => {
     if (!msgGroup && !msgDate) return;

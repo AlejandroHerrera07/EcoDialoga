@@ -24,34 +24,44 @@ def get_dashboard_metrics(
     """
     
     try:
+        # DEBUG: Logear entrada
+        print(f"\n[DEBUG] get_dashboard_metrics()")
+        print(f"  - codigo_grupo: {codigo_grupo} (type: {type(codigo_grupo).__name__})")
+        print(f"  - fecha: {fecha} (type: {type(fecha).__name__})")
+        
         # 1. Obtener todas las interacciones de asistente aplicando filtros
         query = supabase.table("interacciones").select("*").eq("rol", "assistant")
         
         # Aplicar filtros opcionales
         if codigo_grupo:
+            print(f"  - Aplicando filtro codigo_grupo: {codigo_grupo}")
             query = query.eq("codigo_grupo", codigo_grupo)
         
         # Filtrar por fecha específica (solo comparar el día, ignorar hora)
         if fecha:
+            print(f"  - Aplicando filtro fecha: {fecha}")
             query = query.gte("created_at", f"{fecha}T00:00:00")
             query = query.lt("created_at", f"{fecha}T23:59:59")
         
+        print(f"  - Ejecutando query a Supabase...")
         interacciones = query.order("created_at", desc=False).execute().data
+        print(f"  - Interacciones obtenidas: {len(interacciones) if interacciones else 0}")
         
         # Si no hay datos, retornar valores por defecto (0)
         if not interacciones:
+            print(f"  - ⚠️ Sin datos, retornando valores por defecto")
             return {
                 "status": "success",
                 "inter_total": 0,
                 "relev_prom": 0,
-                "calidad_promedio": 0,
+                "Promedio_calidad": 0,
+                "calidad_promedio_data": [],
                 "Cada_funcion": _get_empty_functions(),
                 "total_relevantes": 0,
-                "total_irrelevantes": 0,
+                "Total_irrelevantes": 0,
                 "calidad_0": 0,
                 "calidad_1": 0,
                 "calidad_2": 0,
-                "Promedio_calidad": 0,
             }
         
         # 2. Calcular métrica: Interacciones Totales
@@ -74,7 +84,8 @@ def get_dashboard_metrics(
             })
         
         # 5. Calcular promedios de calidad
-        calidades = [inter.get("calidad_respuesta", 0) for inter in interacciones]
+        # Filtrar valores None y usar 0 como default
+        calidades = [inter.get("calidad_respuesta") or 0 for inter in interacciones]
         promedio_calidad = round(sum(calidades) / len(calidades), 2) if calidades else 0
         
         # Contar por puntuación (0, 1, 2)
@@ -107,9 +118,13 @@ def get_dashboard_metrics(
         }
     
     except Exception as e:
+        error_msg = str(e)
+        print(f"  - [ERROR] en get_dashboard_metrics: {error_msg}")
+        import traceback
+        traceback.print_exc()
         return {
             "status": "error",
-            "message": str(e),
+            "message": error_msg,
             "inter_total": 0,
             "relev_prom": 0,
             "Promedio_calidad": 0,

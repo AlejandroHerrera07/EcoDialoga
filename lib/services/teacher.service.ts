@@ -16,8 +16,9 @@ let MOCK_GROUPS: Group[] = [
     id: "1",
     code: "ECO-2026-A",
     area: "Ciencias Económicas",
+    macroEje: "Microeconomía",
     eje: "Microeconomía",
-    macroEje: "Economía y Sociedad",
+    area_transversal: "Economía y Sociedad",
     problematica: "Impacto de la inflación local",
     icon: "science",
     iconBg: "bg-blue-50",
@@ -28,8 +29,9 @@ let MOCK_GROUPS: Group[] = [
     id: "2",
     code: "BIO-101-C",
     area: "Biología",
+    macroEje: "Genética",
     eje: "Genética",
-    macroEje: "Ciencias de la Vida",
+    area_transversal: "Ciencias de la Vida",
     problematica: "Conservación de especies",
     icon: "biotech",
     iconBg: "bg-purple-50",
@@ -41,7 +43,8 @@ let MOCK_GROUPS: Group[] = [
     code: "FIS-301-B",
     area: "Física",
     eje: "Mecánica",
-    macroEje: "Ciencias Exactas",
+    macroEje: "Mecánica",
+    area_transversal: "Ciencias Exactas",
     problematica: "Energías renovables alternativas",
     icon: "psychology",
     iconBg: "bg-orange-50",
@@ -53,7 +56,8 @@ let MOCK_GROUPS: Group[] = [
     code: "GEO-104-A",
     area: "Geografía",
     eje: "Geopolítica",
-    macroEje: "Ciencias Sociales",
+    macroEje: "Geopolítica",
+    area_transversal: "Ciencias Sociales",
     problematica: "Conflictos territoriales modernos",
     icon: "globe",
     iconBg: "bg-teal-50",
@@ -88,10 +92,23 @@ export const getDashboardMetrics = async (
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_METRICS, "http://dummy.com");
-      // Enviar parámetro codigo_grupo solo si se seleccionó un grupo específico (no vacío)
+      // Construir parámetros de query
       if (groupCode) url.searchParams.append("codigo_grupo", groupCode);
       if (fecha) url.searchParams.append("fecha", fecha);
-      return await apiClient.get<DashboardMetricsResponse>(url.pathname + url.search);
+      
+      const pathWithQuery = url.pathname + url.search;
+      console.log(`[DEBUG] Fetching dashboard metrics: ${pathWithQuery}`);
+      console.log(`  - groupCode: ${groupCode}`);
+      console.log(`  - fecha: ${fecha}`);
+      
+      try {
+        const response = await apiClient.get<DashboardMetricsResponse>(pathWithQuery);
+        console.log(`[DEBUG] Dashboard metrics received:`, response);
+        return response;
+      } catch (error) {
+        console.error(`[ERROR] Failed to fetch dashboard metrics:`, error);
+        throw error;
+      }
     },
     async () => {
       // Simulación de delay de red
@@ -99,6 +116,8 @@ export const getDashboardMetrics = async (
 
       // Simulamos la variacion de metricas según el groupCode aportado (si es null muestra la base)
       const multiplier = groupCode ? 0.6 : 1;
+      
+      console.warn(`[FALLBACK] Using mock data for dashboard (groupCode=${groupCode}, fecha=${fecha})`);
 
       return {
         status: "success",
@@ -154,6 +173,10 @@ export const getDashboardMetrics = async (
         calidad_1: Math.floor(45 * multiplier),
         calidad_2: Math.floor(40 * multiplier),
         Promedio_calidad: 1.3,
+        calidad_promedio_data: Array.from({ length: 30 }, (_, i) => ({
+          nombre: `Respuesta ${i + 1}`,
+          promedio_calidad: Math.random() * 2
+        })),
       };
     }
   );
@@ -203,6 +226,7 @@ export const createGroup = async (newGroupData: Partial<Group>): Promise<Group> 
     area: newGroupData.area || "Nueva Área",
     eje: newGroupData.eje || "Nuevo Eje",
     macroEje: newGroupData.macroEje || "Nuevo Macro Eje",
+    area_transversal: newGroupData.area_transversal || "Nueva Área Transversal",
     problematica: newGroupData.problematica || "Nueva Problemática",
     icon: newGroupData.icon || "science",
     iconBg: newGroupData.iconBg || "bg-blue-50",
