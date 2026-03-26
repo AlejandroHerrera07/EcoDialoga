@@ -70,11 +70,12 @@ def get_dashboard_metrics(
         for idx, inter in enumerate(ultimas_30, 1):
             calidad_promedio_data.append({
                 "nombre": f"Respuesta {idx}",
-                "promedio_calidad": inter.get("calidad_respuesta", 0)
+                "promedio_calidad": (inter.get("calidad_respuesta") or 0)
             })
         
         # 5. Calcular promedios de calidad
-        calidades = [inter.get("calidad_respuesta", 0) for inter in interacciones]
+        # Usar "or 0" para manejar valores None en la BD
+        calidades = [(inter.get("calidad_respuesta") or 0) for inter in interacciones]
         promedio_calidad = round(sum(calidades) / len(calidades), 2) if calidades else 0
         
         # Contar por puntuación (0, 1, 2)
