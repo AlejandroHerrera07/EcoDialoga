@@ -14,6 +14,15 @@ JWT_SECRET = os.environ.get("JWT_SECRET", "tu_clave_secreta_desarrollo")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
+# Validar que las variables de Supabase estén configuradas
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError(
+        "❌ ERROR: Variables de Supabase no configuradas en Railway.\n"
+        "Asegúrate de agregar en Railway → Variables:\n"
+        "  - NEXT_PUBLIC_SUPABASE_URL\n"
+        "  - NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    )
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def generate_token(group_code: str, student_code: str, sesion_id: str) -> str:
