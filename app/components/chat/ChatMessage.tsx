@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Icon } from "@/app/components/ui";
 import { useState, useRef, KeyboardEvent } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -54,7 +55,20 @@ export function ChatMessage({
               : "bg-pastel-green rounded-2xl rounded-tl-sm"
           )}
         >
-          {content}
+          <ReactMarkdown
+            components={{
+              p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>,
+              strong: ({children}) => <strong className="font-bold">{children}</strong>,
+              em: ({children}) => <em className="italic">{children}</em>,
+              ol: ({children}) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+              ul: ({children}) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+              li: ({children}) => <li className="mb-1">{children}</li>,
+              code: ({children}) => <code className="bg-gray-200 bg-opacity-50 px-1 rounded text-sm font-mono">{children}</code>,
+              pre: ({children}) => <pre className="bg-gray-200 bg-opacity-30 p-3 rounded mb-2 overflow-x-auto text-sm">{children}</pre>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
         </div>
       </div>
     </div>

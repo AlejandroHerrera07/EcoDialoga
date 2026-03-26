@@ -28,9 +28,11 @@ interface TeacherSidebarProps {
   onLogout?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
+  userName?: string;
+  userRole?: string;
 }
 
-export function TeacherSidebar({ className, onLogout, isOpen, onClose }: TeacherSidebarProps) {
+export function TeacherSidebar({ className, onLogout, isOpen, onClose, userName = "Docente", userRole = "Docente" }: TeacherSidebarProps) {
   const pathname = usePathname();
   const [momento, setMomento] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -190,9 +192,9 @@ export function TeacherSidebar({ className, onLogout, isOpen, onClose }: Teacher
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-neutral-text truncate">
-                Profesora Andrea
+                {userName}
               </p>
-              <p className="text-xs text-subtle-text truncate">Docente directora</p>
+              <p className="text-xs text-subtle-text truncate">{userRole}</p>
             </div>
           </div>
         </div>

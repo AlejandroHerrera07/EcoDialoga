@@ -43,7 +43,9 @@ export default function TeacherLayout({
       <TeacherSidebar 
         onLogout={handleLogout} 
         isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+        onClose={() => setIsMobileMenuOpen(false)}
+        userName={user?.name || "Docente"}
+        userRole={user?.role === "teacher" ? "Docente" : "Usuario"}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TeacherMobileHeader 

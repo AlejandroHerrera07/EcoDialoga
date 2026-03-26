@@ -38,7 +38,6 @@ def require_auth(f):
 
 @app.route('/auth/login', methods=['POST'])
 def login_handler():
-    print("Entrando a login")
     """
     Endpoint de login.
     Body: { "groupCode": string, "studentCode": string }
@@ -135,7 +134,6 @@ def update_consent_handler(user=None):
 @app.route('/api/chat', methods=['POST'])
 @require_auth
 def chat_handler(user=None):
-    #print(data)
     try:
         data = request.json
         user_msg = data.get("content")
@@ -248,9 +246,6 @@ def update_group_info(codigo, user=None):
             "problematica": data.get("problematica"),
             "grado": int(data.get("grado")) if data.get("grado") else None
         }
-        
-        # Log para debugging
-        print(f"Actualizando grupo {codigo} con datos: {update_data}")
         
         result = supabase.table("grupos").update(update_data).eq("codigo_grupo", codigo).execute()
         
