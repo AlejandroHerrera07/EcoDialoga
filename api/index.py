@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from functools import wraps
 from flask_cors import CORS
 from database import get_supabase_client, save_interaction
-from workflow import process_ai_response
+from workflow import process_ai_response, evaluate_response_metrics
 from auth import login as auth_login, get_user_from_token
 from dashboard import get_dashboard_metrics, get_recent_messages, get_grupos_list
 
@@ -151,22 +151,34 @@ def chat_handler(user=None):
 
         estudiante_res = supabase.table("estudiantes").select("id").eq("identificador_estudiante", student_id).single().execute()
         estudiante_id = estudiante_res.data.get("id")
+        
         # 2. Guardar el mensaje del estudiante
         res_user = save_interaction(supabase, sesion_id, "user", user_msg, group_code, student_id=estudiante_id, student_code=student_id)
         pregunta_id = res_user.data[0]['id']
 
         # 3. Procesar con OpenAI Agent Builder
-        #ai_text, """final_thread_id"""
         ai_text = process_ai_response(user_msg, supabase, group_code)
 
-        #if not current_thread_id and final_thread_id:
-        #    supabase.table("grupos").update({"thread_id": final_thread_id}).eq("codigo_grupo", group_code).execute()
-        # 4. Guardar la respuesta de la IA vinculada a la pregunta
-        save_interaction(supabase, sesion_id, "assistant", ai_text, group_code, reply_to=pregunta_id)
+        # 4. Evaluar métricas de la respuesta del asistente
+        metrics = evaluate_response_metrics(user_msg, ai_text, supabase, group_code)
+
+        # 5. Guardar la respuesta de la IA con métricas
+        save_interaction(
+            supabase, 
+            sesion_id, 
+            "assistant", 
+            ai_text, 
+            group_code, 
+            reply_to=pregunta_id,
+            es_relevante=metrics.get("es_relevante"),
+            calidad_respuesta=metrics.get("calidad_respuesta"),
+            funcion_utilizada=metrics.get("funcion_utilizada")
+        )
 
         return jsonify({
             "status": "success",
-            "message": ai_text
+            "message": ai_text,
+            "metrics": metrics
         })
 
     except Exception as e:

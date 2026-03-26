@@ -110,7 +110,7 @@ def format_grupo_context(grupo_info):
 - **Área Transversal:** {area_transversal}
 - **Eje Ambiental:** {eje_ambiental}
 - **Problemática:** {problematica}
-- **Grado Destinatario de la Secuencia Didáctica:** {grado}
+- **Grado al que corresponde la Secuencia Didáctica:** {grado}
 
 Con base en este contexto, acompaña al grupo en el diseño de su secuencia didáctica.
 """
@@ -222,3 +222,171 @@ def process_ai_response(user_message, supabase, codigo_grupo):
 
         print("Error en process_ai_response:", str(e))
         return f"Error: {str(e)}"
+
+
+# ---------------------------------------------------
+# Evaluar métricas de la respuesta del asistente
+# ---------------------------------------------------
+
+def evaluate_response_metrics(user_message, ai_response, supabase, codigo_grupo):
+    """
+    Evalúa las métricas de la respuesta del asistente usando OpenAI.
+    
+    Args:
+        user_message: Mensaje del usuario
+        ai_response: Respuesta del asistente
+        supabase: Cliente de Supabase
+        codigo_grupo: Código del grupo
+    
+    Returns:
+        Dict con las métricas: {
+            "es_relevante": bool,
+            "calidad_respuesta": int (0, 1, o 2),
+            "funcion_utilizada": str
+        }
+    """
+    import json
+    
+    try:
+        # Obtener contexto del grupo
+        grupo_info = fetch_grupo_info(supabase, codigo_grupo)
+        grupo_context = format_grupo_context(grupo_info) if grupo_info else ""
+        
+        # Obtener últimos mensajes
+        last_messages = fetch_last_messages(supabase, codigo_grupo, 5)
+        
+        # Construir contexto de conversación
+        conversation_context = "\n".join([
+            f"{msg['role'].upper()}: {msg['content'][:200]}..."
+            if len(msg['content']) > 200 
+            else f"{msg['role'].upper()}: {msg['content']}"
+            for msg in last_messages[-4:]  # Últimos 4 mensajes
+        ])
+        
+        # Prompt para evaluar métricas
+        evaluation_prompt = f"""
+Evalúa la siguiente respuesta de un asistente educativo ambiental para un grupo de estudiantes.
+
+CONTEXTO DEL GRUPO:
+{grupo_context}
+
+CONTEXTO DE CONVERSACIÓN (últimos mensajes):
+{conversation_context}
+
+PREGUNTA DEL ESTUDIANTE:
+{user_message}
+
+RESPUESTA DEL ASISTENTE:
+{ai_response}
+
+---
+
+Basándote en la pregunta y la respuesta, evalúa EXACTAMENTE estos tres aspectos:
+
+1. **es_relevante** (boolean): ¿La respuesta responde directamente a la pregunta del estudiante?
+   - true: Si responde la pregunta planteada
+   - false: Si no responde o desvía completamente el tema
+
+2. **calidad_respuesta** (número: 0, 1 o 2):
+   - 0: La respuesta es irrelevante o no contribuye al aprendizaje
+   - 1: La respuesta es parcialmente útil, tiene información válida pero incomplete
+   - 2: La respuesta es clara, pertinente, y promueve comprensión o avance significativo
+
+3. **funcion_utilizada** (string): Identifica la función pedagógica principal de la respuesta. SOLO una de estas opciones:
+   - "Redacción / mejora de texto"
+   - "Búsqueda de información"
+   - "Generación de ideas"
+   - "Orientación metodológica"
+   - "Revisión conceptual o teórica"
+   - "Evaluación o retroalimentación"
+   - "Pregunta para pensar"
+   - "Retroalimentación"
+   - "Andamiaje"
+   - "Argumentación"
+   - "Metacognición"
+   - "Contraargumentación"
+
+RETORNA SOLO UN JSON VÁLIDO, sin explicaciones adicionales:
+{{
+    "es_relevante": true/false,
+    "calidad_respuesta": 0,
+    "funcion_utilizada": "UNA DE LAS OPCIONES LISTADAS"
+}}
+"""
+        
+        # Llamar a OpenAI para evaluar
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Eres un evaluador experto de respuestas educativas. Tu tarea es evaluar respuestas según criterios específicos. SEMPRE retorna SOLO un JSON válido sin texto adicional."
+                },
+                {
+                    "role": "user",
+                    "content": evaluation_prompt
+                }
+            ],
+            temperature=0.3,
+            max_tokens=200
+        )
+        
+        # Extraer y parsear la respuesta
+        response_text = response.choices[0].message.content.strip()
+        
+        # Intentar extraer JSON si hay texto adicional
+        if "```json" in response_text:
+            json_start = response_text.find("```json") + 7
+            json_end = response_text.find("```", json_start)
+            response_text = response_text[json_start:json_end].strip()
+        elif "```" in response_text:
+            json_start = response_text.find("```") + 3
+            json_end = response_text.find("```", json_start)
+            response_text = response_text[json_start:json_end].strip()
+        
+        # Parsear JSON
+        metrics = json.loads(response_text)
+        
+        # Validar que las claves existan y tengan valores válidos
+        if "es_relevante" not in metrics:
+            metrics["es_relevante"] = True
+        if "calidad_respuesta" not in metrics:
+            metrics["calidad_respuesta"] = 1
+        elif metrics["calidad_respuesta"] not in [0, 1, 2]:
+            metrics["calidad_respuesta"] = 1
+        
+        # Validar función_utilizada
+        valid_functions = [
+            "Redacción / mejora de texto",
+            "Búsqueda de información",
+            "Generación de ideas",
+            "Orientación metodológica",
+            "Revisión conceptual o teórica",
+            "Evaluación o retroalimentación",
+            "Pregunta para pensar",
+            "Retroalimentación",
+            "Andamiaje",
+            "Argumentación",
+            "Metacognición",
+            "Contraargumentación"
+        ]
+        
+        if "funcion_utilizada" not in metrics or metrics["funcion_utilizada"] not in valid_functions:
+            metrics["funcion_utilizada"] = "Orientación metodológica"  # Por defecto
+        
+        return metrics
+        
+    except json.JSONDecodeError as e:
+        print(f"Error al parsear JSON de métricas: {str(e)}")
+        return {
+            "es_relevante": True,
+            "calidad_respuesta": 1,
+            "funcion_utilizada": "Orientación metodológica"
+        }
+    except Exception as e:
+        print(f"Error evaluando métricas: {str(e)}")
+        return {
+            "es_relevante": True,
+            "calidad_respuesta": 1,
+            "funcion_utilizada": "Orientación metodológica"
+        }

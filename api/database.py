@@ -10,13 +10,12 @@ def get_supabase_client() -> Client:
     key = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
     return create_client(url, key)
 
-def save_interaction(supabase, sesion_id, role, content, group_code, student_id=None, student_code=None, reply_to=None):
+def save_interaction(supabase, sesion_id, role, content, group_code, student_id=None, student_code=None, reply_to=None, es_relevante=None, calidad_respuesta=None, funcion_utilizada=None):
     data = {
         "sesion_id": sesion_id,
         "rol": role,
         "codigo_grupo": group_code,
         "contenido": content,
-        "es_relevante": True if role == "assistant" else False
     }
     if student_id:
         data["estudiante_id"] = student_id
@@ -24,5 +23,14 @@ def save_interaction(supabase, sesion_id, role, content, group_code, student_id=
         data["identificador_estudiante"] = student_code
     if reply_to:
         data["reply_to"] = reply_to
+    
+    # Solo agregar métricas si es una respuesta del asistente
+    if role == "assistant":
+        if es_relevante is not None:
+            data["es_relevante"] = es_relevante
+        if calidad_respuesta is not None:
+            data["calidad_respuesta"] = calidad_respuesta
+        if funcion_utilizada is not None:
+            data["funcion_utilizada"] = funcion_utilizada
         
     return supabase.table("interacciones").insert(data).execute()
