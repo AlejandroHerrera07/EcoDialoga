@@ -182,7 +182,7 @@ export default function GroupsPage() {
                         scope="col"
                         className="px-3 py-4 text-left text-sm font-semibold text-[#2c5c23] w-1/6"
                       >
-                        Eje
+                        Area Transversal
                       </th>
                       <th
                         scope="col"
@@ -231,10 +231,10 @@ export default function GroupsPage() {
                           {group.area}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {group.eje}
+                          {group.area_transversal}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {group.macroEje}
+                          {group.eje}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={group.problematica}>
                           {group.problematica}

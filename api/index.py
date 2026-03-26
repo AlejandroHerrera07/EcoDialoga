@@ -212,6 +212,7 @@ def update_group_info(codigo, user=None):
     Endpoint para actualizar información del grupo.
     Body: {
         "area_curricular": string,
+        "area_transversal": string,
         "eje_ambiental": string,
         "problematica": string,
         "grado": number
@@ -230,6 +231,7 @@ def update_group_info(codigo, user=None):
         # Actualizar grupo en Supabase
         update_data = {
             "area_curricular": data.get("area_curricular"),
+            "area_transversal": data.get("area_transversal"),
             "eje_ambiental": data.get("eje_ambiental"),
             "problematica": data.get("problematica"),
             "grado": int(data.get("grado")) if data.get("grado") else None
@@ -253,39 +255,6 @@ def update_group_info(codigo, user=None):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # ─────────────────────────────────────────────
-# DEBUG ENDPOINTS (para diagnóstico)
-# ─────────────────────────────────────────────
-
-@app.route('/debug/interacciones-count', methods=['GET'])
-def debug_interacciones_count():
-    """
-    Endpoint de debug para ver cuántos registros hay en la tabla interacciones
-    """
-    try:
-        # Contar total
-        result_total = supabase.table("interacciones").select("count", count="exact").execute()
-        total = result_total.count if result_total.count else 0
-        
-        # Contar por rol
-        result_assistant = supabase.table("interacciones").select("*").eq("rol", "assistant").execute()
-        assistant_count = len(result_assistant.data) if result_assistant.data else 0
-        
-        result_user = supabase.table("interacciones").select("*").eq("rol", "user").execute()
-        user_count = len(result_user.data) if result_user.data else 0
-        
-        # Obtener una muestra
-        sample = supabase.table("interacciones").select("*").limit(5).execute().data if result_assistant.data else []
-        
-        return jsonify({
-            "total": total,
-            "assistant_count": assistant_count,
-            "user_count": user_count,
-            "sample": sample[:1] if sample else []
-        }), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ─────────────────────────────────────────────
 # DASHBOARD ENDPOINTS
 # ─────────────────────────────────────────────
 
@@ -296,7 +265,8 @@ def get_metrics(user=None):
     Endpoint para obtener métricas del dashboard.
     Query params (todos opcionales):
       - codigo_grupo: string (ej: "ECO-2026-A")
-      - fecha: string (formato ISO: YYYY-MM-DD)
+      - fecha_inicio: string (formato ISO: YYYY-MM-DD)
+      - fecha_fin: string (formato ISO: YYYY-MM-DD)
     
     Retorna:
       - inter_total: Total de interacciones
@@ -313,12 +283,6 @@ def get_metrics(user=None):
         codigo_grupo = request.args.get('codigo_grupo')
         fecha = request.args.get('fecha')
         
-        # DEBUG: Logear qué parámetros se reciben
-        print(f"\n[DEBUG] GET /teacher/metrics")
-        print(f"  - codigo_grupo: {codigo_grupo}")
-        print(f"  - fecha: {fecha}")
-        print(f"  - Query params completos: {request.args.to_dict()}")
-        
         # Llamar función de dashboard
         metrics = get_dashboard_metrics(
             supabase,
@@ -326,17 +290,10 @@ def get_metrics(user=None):
             fecha=fecha
         )
         
-        # DEBUG: Logear resultados
-        print(f"  - Status respuesta: {metrics.get('status')}")
-        print(f"  - Interacciones totales: {metrics.get('inter_total')}")
-        print(f"  - Funciones con datos: {sum(1 for f in metrics.get('Cada_funcion', []) if f.get('count', 0) > 0)}")
-        
         return jsonify(metrics), 200
     
     except Exception as e:
         print(f"Error en get_metrics: {str(e)}")
-        import traceback
-        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/teacher/recent-messages', methods=['GET'])

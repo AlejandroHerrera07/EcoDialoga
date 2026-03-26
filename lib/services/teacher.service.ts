@@ -92,23 +92,10 @@ export const getDashboardMetrics = async (
   return fallbackOnError(
     async () => {
       const url = new URL(API_ENDPOINTS.TEACHER_METRICS, "http://dummy.com");
-      // Construir parámetros de query
+      // Enviar parámetro codigo_grupo solo si se seleccionó un grupo específico (no vacío)
       if (groupCode) url.searchParams.append("codigo_grupo", groupCode);
       if (fecha) url.searchParams.append("fecha", fecha);
-      
-      const pathWithQuery = url.pathname + url.search;
-      console.log(`[DEBUG] Fetching dashboard metrics: ${pathWithQuery}`);
-      console.log(`  - groupCode: ${groupCode}`);
-      console.log(`  - fecha: ${fecha}`);
-      
-      try {
-        const response = await apiClient.get<DashboardMetricsResponse>(pathWithQuery);
-        console.log(`[DEBUG] Dashboard metrics received:`, response);
-        return response;
-      } catch (error) {
-        console.error(`[ERROR] Failed to fetch dashboard metrics:`, error);
-        throw error;
-      }
+      return await apiClient.get<DashboardMetricsResponse>(url.pathname + url.search);
     },
     async () => {
       // Simulación de delay de red
@@ -116,8 +103,6 @@ export const getDashboardMetrics = async (
 
       // Simulamos la variacion de metricas según el groupCode aportado (si es null muestra la base)
       const multiplier = groupCode ? 0.6 : 1;
-      
-      console.warn(`[FALLBACK] Using mock data for dashboard (groupCode=${groupCode}, fecha=${fecha})`);
 
       return {
         status: "success",
@@ -173,10 +158,6 @@ export const getDashboardMetrics = async (
         calidad_1: Math.floor(45 * multiplier),
         calidad_2: Math.floor(40 * multiplier),
         Promedio_calidad: 1.3,
-        calidad_promedio_data: Array.from({ length: 30 }, (_, i) => ({
-          nombre: `Respuesta ${i + 1}`,
-          promedio_calidad: Math.random() * 2
-        })),
       };
     }
   );

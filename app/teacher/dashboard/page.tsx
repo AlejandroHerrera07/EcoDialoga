@@ -43,18 +43,12 @@ function AnimatedCounter({ value, suffix = "", duration = 1.5, delay = 0.3 }: An
 function AnimatedMetricCard({
   title,
   value,
-  suffix = "",
-  change,
   changeLabel,
-  icon,
   delay = 0,
 }: {
   title: string;
   value: number;
-  suffix?: string;
-  change: number;
   changeLabel: string;
-  icon: string;
   delay?: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -69,42 +63,17 @@ function AnimatedMetricCard({
     }
   }, [delay]);
 
-  const isPositive = change > 0;
-  const isNeutral = change === 0;
-
   return (
     <div
       ref={cardRef}
       className="bg-white rounded-xl p-6 shadow-sm border-t-[6px] border-mint-accent flex flex-col gap-2 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-center justify-between">
-        <p className="text-subtle-text text-sm font-medium uppercase tracking-wider">
-          {title}
-        </p>
-        <span className="material-symbols-outlined text-teal-accent bg-teal-accent/10 p-1.5 rounded-lg text-[20px]">
-          {icon}
-        </span>
-      </div>
-      <div className="flex items-baseline gap-3 mt-2">
-        <p className="text-neutral-text text-4xl font-bold tracking-tight">
-          <AnimatedCounter value={value} suffix={suffix} delay={delay + 0.3} />
-        </p>
-        <span
-          className={`flex items-center text-sm font-bold px-2 py-0.5 rounded-full ${
-            isPositive
-              ? "text-success bg-success/10"
-              : isNeutral
-              ? "text-subtle-text bg-slate-100"
-              : "text-red-600 bg-red-100"
-          }`}
-        >
-          <Icon
-            name={isPositive ? "arrow_upward" : isNeutral ? "remove" : "arrow_downward"}
-            size="sm"
-          />
-          {Math.abs(change)}%
-        </span>
-      </div>
+      <p className="text-subtle-text text-sm font-medium uppercase tracking-wider">
+        {title}
+      </p>
+      <p className="text-neutral-text text-4xl font-bold tracking-tight mt-2">
+        <AnimatedCounter value={value} delay={delay + 0.3} />
+      </p>
       <p className="text-subtle-text text-xs mt-1">{changeLabel}</p>
     </div>
   );
@@ -207,7 +176,6 @@ function QualityLineChart({ promedio, calidadData }: { promedio: number; calidad
           </div>
           <div className="mt-3 flex items-center gap-1 text-mint-accent text-xs font-semibold">
             <Icon name="trending_up" className="!text-sm" />
-            <span>+0.2 pts</span>
           </div>
         </div>
       </div>
@@ -337,17 +305,6 @@ export default function TeacherDashboardPage() {
   const [msgDate, setMsgDate] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [filteredMessages, setFilteredMessages] = useState<DashboardMessage[]>([]);
-  
-  // DEBUG: Log filter state changes
-  useEffect(() => {
-    console.log(`[DASHBOARD] Filter state changed:`, {
-      panelGroup: panelGroup || 'ninguno',
-      panelDate: panelDate || 'ninguna',
-      isLoading,
-      hasError: !!error,
-      hasMetrics: !!metrics && metrics.inter_total > 0
-    });
-  }, [panelGroup, panelDate, isLoading, error, metrics]);
 
   const handleSearchMessages = () => {
     if (!msgGroup && !msgDate) return;
@@ -381,7 +338,7 @@ export default function TeacherDashboardPage() {
             Panel de Métricas
           </h2>
           <p className="text-subtle-text text-sm font-medium">
-            Resumen de Métricas y Análisis del año 2026
+            Resumen de Métricas y Análisis de Interacciones
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -426,18 +383,13 @@ export default function TeacherDashboardPage() {
                 <AnimatedMetricCard
                   title="INTERACCIONES TOTALES"
                   value={metrics.inter_total}
-                  change={12}
-                  changeLabel="Vs. últimos 30 días"
-                  icon="chat_bubble"
+                  changeLabel="Interacciones registradas"
                   delay={0}
                 />
                 <AnimatedMetricCard
                   title="RELEVANCIA PROMEDIO"
                   value={metrics.relev_prom}
-                  suffix="%"
-                  change={5}
                   changeLabel="Puntuación de precisión IA"
-                  icon="target"
                   delay={0.1}
                 />
               </div>

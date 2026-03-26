@@ -24,44 +24,34 @@ def get_dashboard_metrics(
     """
     
     try:
-        # DEBUG: Logear entrada
-        print(f"\n[DEBUG] get_dashboard_metrics()")
-        print(f"  - codigo_grupo: {codigo_grupo} (type: {type(codigo_grupo).__name__})")
-        print(f"  - fecha: {fecha} (type: {type(fecha).__name__})")
-        
         # 1. Obtener todas las interacciones de asistente aplicando filtros
         query = supabase.table("interacciones").select("*").eq("rol", "assistant")
         
         # Aplicar filtros opcionales
         if codigo_grupo:
-            print(f"  - Aplicando filtro codigo_grupo: {codigo_grupo}")
             query = query.eq("codigo_grupo", codigo_grupo)
         
         # Filtrar por fecha específica (solo comparar el día, ignorar hora)
         if fecha:
-            print(f"  - Aplicando filtro fecha: {fecha}")
             query = query.gte("created_at", f"{fecha}T00:00:00")
             query = query.lt("created_at", f"{fecha}T23:59:59")
         
-        print(f"  - Ejecutando query a Supabase...")
         interacciones = query.order("created_at", desc=False).execute().data
-        print(f"  - Interacciones obtenidas: {len(interacciones) if interacciones else 0}")
         
         # Si no hay datos, retornar valores por defecto (0)
         if not interacciones:
-            print(f"  - ⚠️ Sin datos, retornando valores por defecto")
             return {
                 "status": "success",
                 "inter_total": 0,
                 "relev_prom": 0,
-                "Promedio_calidad": 0,
-                "calidad_promedio_data": [],
+                "calidad_promedio": 0,
                 "Cada_funcion": _get_empty_functions(),
                 "total_relevantes": 0,
-                "Total_irrelevantes": 0,
+                "total_irrelevantes": 0,
                 "calidad_0": 0,
                 "calidad_1": 0,
                 "calidad_2": 0,
+                "Promedio_calidad": 0,
             }
         
         # 2. Calcular métrica: Interacciones Totales
@@ -84,8 +74,7 @@ def get_dashboard_metrics(
             })
         
         # 5. Calcular promedios de calidad
-        # Filtrar valores None y usar 0 como default
-        calidades = [inter.get("calidad_respuesta") or 0 for inter in interacciones]
+        calidades = [inter.get("calidad_respuesta", 0) for inter in interacciones]
         promedio_calidad = round(sum(calidades) / len(calidades), 2) if calidades else 0
         
         # Contar por puntuación (0, 1, 2)
@@ -97,11 +86,32 @@ def get_dashboard_metrics(
         funciones_count = {}
         for inter in interacciones:
             # Normalizar el nombre de función desde la BD a la clave esperada
-            funcion_raw = inter.get("funcion_utilizada", "Otras")
-            funcion_normalizada = _normalizar_funcion(funcion_raw)
-            funciones_count[funcion_normalizada] = funciones_count.get(funcion_normalizada, 0) + 1
+            funcion_raw = inter.get("funcion_utilizada")
+            
+            # Si funcion_utilizada está NULL o vacío, no contar (podría ser chat sin función asignada)
+            if funcion_raw and str(funcion_raw).strip():
+                funcion_normalizada = _normalizar_funcion(funcion_raw)
+                funciones_count[funcion_normalizada] = funciones_count.get(funcion_normalizada, 0) + 1
         
-        cada_funcion = _calcular_funciones(funciones_count)
+        # DEBUG: Loguear los datos
+        print(f"[DEBUG] inter_total: {inter_total}, funciones_count: {funciones_count}")
+        
+        # Inicializar todas las funciones con 0 si no tienen datos
+        todas_las_funciones = {
+            "redacción": 0,
+            "generación_ideas": 0,
+            "orientación_metodológica": 0,
+            "búsqueda_información": 0,
+            "revisión_teórica": 0,
+            "evaluación": 0,
+        }
+        todas_las_funciones.update(funciones_count)
+        
+        print(f"[DEBUG] todas_las_funciones: {todas_las_funciones}")
+        
+        cada_funcion = _calcular_funciones(todas_las_funciones, inter_total)
+        
+        print(f"[DEBUG] cada_funcion result: {cada_funcion}")
         
         return {
             "status": "success",
@@ -118,13 +128,9 @@ def get_dashboard_metrics(
         }
     
     except Exception as e:
-        error_msg = str(e)
-        print(f"  - [ERROR] en get_dashboard_metrics: {error_msg}")
-        import traceback
-        traceback.print_exc()
         return {
             "status": "error",
-            "message": error_msg,
+            "message": str(e),
             "inter_total": 0,
             "relev_prom": 0,
             "Promedio_calidad": 0,
@@ -191,7 +197,7 @@ def get_grupos_list(supabase: Client):
     """
     
     try:
-        grupos_raw = supabase.table("grupos").select("id, codigo_grupo, area_curricular, eje_ambiental, problematica, grado").execute().data
+        grupos_raw = supabase.table("grupos").select("id, codigo_grupo, area_curricular, area_transversal, eje_ambiental, problematica, grado").execute().data
         
         # Mapear campos de BD a estructura que espera el frontend
         grupos_formateados = []
@@ -200,8 +206,9 @@ def get_grupos_list(supabase: Client):
                 "id": grupo.get("id"),
                 "code": grupo.get("codigo_grupo"),  # Mapear codigo_grupo → code
                 "area": grupo.get("area_curricular", ""),
+                "area_transversal": grupo.get("area_transversal", ""),  # Nueva columna
                 "eje": grupo.get("eje_ambiental", ""),
-                "macroEje": grupo.get("area_curricular", ""),  # Usar area_curricular como macroEje por defecto
+                "macroEje": grupo.get("eje_ambiental", ""),  # Cambiar de area_curricular a eje_ambiental
                 "problematica": grupo.get("problematica", ""),
                 "icon": "science",  # Valores por defecto
                 "iconBg": "bg-blue-50",
@@ -250,9 +257,13 @@ def _normalizar_funcion(funcion_raw: str) -> str:
     # Si no encuentra, retornar una categoría por defecto
     return "búsqueda_información"
 
-def _calcular_funciones(funciones_count: dict) -> list:
+def _calcular_funciones(funciones_count: dict, total_interacciones: int = None) -> list:
     """
     Convierte un diccionario de conteo de funciones a una lista con colores y porcentajes.
+    
+    Args:
+        funciones_count: Dict con conteos de funciones
+        total_interacciones: Total de interacciones para calcular porcentajes (si no se proporciona, usa sum(funciones_count))
     """
     
     # Definir las 6 funciones predeterminadas con sus colores
@@ -295,8 +306,8 @@ def _calcular_funciones(funciones_count: dict) -> list:
         },
     }
     
-    # Calcular total
-    total = sum(funciones_count.values())
+    # Usar total_interacciones si se proporciona, sino suma de funciones
+    total = total_interacciones if total_interacciones else sum(funciones_count.values())
     
     # Construir resultado
     resultado = []

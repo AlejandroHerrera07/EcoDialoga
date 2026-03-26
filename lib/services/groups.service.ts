@@ -5,6 +5,7 @@ export interface GroupInfo {
   id: string;
   codigo: string;
   area_curricular?: string | null;
+  area_transversal?: string | null;
   eje_ambiental?: string | null;
   problematica?: string | null;
   grado?: string | null;
@@ -26,6 +27,7 @@ async function mockGetGroupInfo(groupCode: string): Promise<GroupInfo | null> {
     id: "grp_001",
     codigo: groupCode,
     area_curricular: null,
+    area_transversal: null,
     eje_ambiental: null,
     problematica: null,
     grado: null,
@@ -41,6 +43,7 @@ async function mockUpdateGroupInfo(
     id: "grp_001",
     codigo: groupCode,
     area_curricular: data.area_curricular,
+    area_transversal: data.area_transversal,
     eje_ambiental: data.eje_ambiental,
     problematica: data.problematica,
     grado: data.grado,
@@ -113,6 +116,7 @@ export async function updateGroupInfo(
       `/grupos/${groupCode}`,
       {
         area_curricular: data.area_curricular,
+        area_transversal: data.area_transversal,
         eje_ambiental: data.eje_ambiental,
         problematica: data.problematica,
         grado: parseInt(data.grado, 10), // Asegurar que grado es número

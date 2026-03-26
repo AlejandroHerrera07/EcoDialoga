@@ -37,6 +37,7 @@ export interface Group {
   id: string;
   code: string;
   area: string;
+  area_transversal: string;
   eje: string;
   macroEje: string;
   problematica: string;

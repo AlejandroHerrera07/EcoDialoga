@@ -10,6 +10,7 @@ interface GroupInfoModalProps {
 
 export interface GroupInfoData {
   area_curricular: string;
+  area_transversal: string;
   eje_ambiental: string;
   problematica: string;
   grado: string;
@@ -21,12 +22,23 @@ const AREA_CURRICULAR_OPTIONS = [
   "Ética",
 ];
 
-const EJE_AMBIENTAL_OPTIONS = [
-  "Agua y sostenibilidad hídrica",
-  "Cambio climático y energía",
+const AREA_TRANSVERSAL_OPTIONS = [
+  "Ciencias Sociales",
+  "Ciencias Naturales",
+  "Ética",
 ];
 
-const GRADO_OPTIONS = Array.from({ length: 6 }, (_, i) => (i + 6).toString());
+const EJE_AMBIENTAL_OPTIONS = [
+  "Agua y sostenibilidad hídrica",
+  "Biodiversidad y ecosistemas",
+  "Energía y cambio climático",
+  "Producción y consumo responsables",
+  "Ética del cuidado ambiental",
+  "Ciudadanía ambiental y justicia social",
+  "Valores y estilos de vida sostenibles",
+];
+
+const GRADO_OPTIONS = Array.from({ length: 5 }, (_, i) => (i + 6).toString());
 
 export function GroupInfoModal({
   onSubmit,
@@ -34,6 +46,7 @@ export function GroupInfoModal({
 }: GroupInfoModalProps) {
   const [formData, setFormData] = useState<GroupInfoData>({
     area_curricular: "",
+    area_transversal: "",
     eje_ambiental: "",
     problematica: "",
     grado: "",
@@ -46,6 +59,9 @@ export function GroupInfoModal({
 
     if (!formData.area_curricular.trim()) {
       newErrors.area_curricular = "Por favor selecciona un área curricular";
+    }
+    if (!formData.area_transversal.trim()) {
+      newErrors.area_transversal = "Por favor selecciona un área transversal";
     }
     if (!formData.eje_ambiental.trim()) {
       newErrors.eje_ambiental = "Por favor selecciona un eje ambiental";
@@ -118,6 +134,37 @@ export function GroupInfoModal({
             </select>
             {errors.area_curricular && (
               <p className="text-red-500 text-sm mt-1">{errors.area_curricular}</p>
+            )}
+          </div>
+
+          {/* Area Transversal */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Área Transversal *
+            </label>
+            <select
+              value={formData.area_transversal}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  area_transversal: e.target.value,
+                })
+              }
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all ${
+                errors.area_transversal
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+            >
+              <option value="">Selecciona un área...</option>
+              {AREA_TRANSVERSAL_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {errors.area_transversal && (
+              <p className="text-red-500 text-sm mt-1">{errors.area_transversal}</p>
             )}
           </div>
 

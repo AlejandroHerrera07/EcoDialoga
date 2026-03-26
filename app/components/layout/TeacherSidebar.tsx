@@ -128,9 +128,9 @@ export function TeacherSidebar({ className, onLogout, isOpen, onClose }: Teacher
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-neutral-text truncate">
-                Dra. Marcela Ramírez
+                Profesora Andrea
               </p>
-              <p className="text-xs text-subtle-text truncate">Departamento de Ciencias</p>
+              <p className="text-xs text-subtle-text truncate">Docente directora</p>
             </div>
           </div>
         </div>
