@@ -4,6 +4,7 @@ export interface FunctionMetric {
   color: string;
   value: number;
   hex: string;
+  count?: number;  // Número de interacciones de este tipo
 }
 
 export interface CalidadData {

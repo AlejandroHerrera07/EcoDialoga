@@ -97,14 +97,20 @@ def get_dashboard_metrics(
         # DEBUG: Loguear los datos
         print(f"[DEBUG] inter_total: {inter_total}, funciones_count: {funciones_count}")
         
-        # Inicializar todas las funciones con 0 si no tienen datos
+        # Inicializar todas las 12 funciones con 0 si no tienen datos
         todas_las_funciones = {
-            "redacción": 0,
-            "generación_ideas": 0,
-            "orientación_metodológica": 0,
-            "búsqueda_información": 0,
-            "revisión_teórica": 0,
-            "evaluación": 0,
+            "Redacción / mejora de texto": 0,
+            "Búsqueda de información": 0,
+            "Generación de ideas": 0,
+            "Orientación metodológica": 0,
+            "Revisión conceptual o teórica": 0,
+            "Evaluación o retroalimentación": 0,
+            "Pregunta para pensar": 0,
+            "Retroalimentación": 0,
+            "Andamiaje": 0,
+            "Argumentación": 0,
+            "Metacognición": 0,
+            "Contraargumentación": 0,
         }
         todas_las_funciones.update(funciones_count)
         
@@ -231,32 +237,45 @@ def get_grupos_list(supabase: Client):
 
 def _normalizar_funcion(funcion_raw: str) -> str:
     """
-    Normaliza los valores de funcion_utilizada de la BD a las claves esperadas.
+    Normaliza los valores de funcion_utilizada de la BD.
     
-    Mapea valores como "Análisis", "Síntesis", etc. a las claves internas
-    del sistema de categorización.
+    Las funciones se guardan con sus nombres exactos ya validados desde workflow.py,
+    así que solo se necesita limpiar espacios y garantizar consistencia.
     """
     
-    # Mapping de valores BD → claves internas
-    mapping = {
-        "Análisis": "orientación_metodológica",
-        "Síntesis": "redacción",
-        "Generación": "generación_ideas",
-        "Evaluación": "evaluación",
-        "Otros": "búsqueda_información",
-        "General": "revisión_teórica",
-    }
+    # Funciones válidas que se pueden guardar
+    funciones_validas = [
+        "Redacción / mejora de texto",
+        "Búsqueda de información",
+        "Generación de ideas",
+        "Orientación metodológica",
+        "Revisión conceptual o teórica",
+        "Evaluación o retroalimentación",
+        "Pregunta para pensar",
+        "Retroalimentación",
+        "Andamiaje",
+        "Argumentación",
+        "Metacognición",
+        "Contraargumentación"
+    ]
     
-    # Normalizar: convertir a minúsculas y buscar
-    funcion_lower = funcion_raw.lower().strip() if funcion_raw else "general"
+    if not funcion_raw:
+        return "Orientación metodológica"  # Por defecto
     
-    # Buscar coincidencia en el mapping (case-insensitive)
-    for key, value in mapping.items():
-        if key.lower() == funcion_lower:
-            return value
+    funcion_clean = str(funcion_raw).strip()
     
-    # Si no encuentra, retornar una categoría por defecto
-    return "búsqueda_información"
+    # Si ya coincide exactamente, retornar
+    if funcion_clean in funciones_validas:
+        return funcion_clean
+    
+    # Si no, buscar case-insensitive
+    funcion_lower = funcion_clean.lower()
+    for func in funciones_validas:
+        if func.lower() == funcion_lower:
+            return func
+    
+    # Si no encuentra coincidencia, retornar por defecto
+    return "Orientación metodológica"
 
 def _calcular_funciones(funciones_count: dict, total_interacciones: int = None) -> list:
     """
@@ -264,46 +283,82 @@ def _calcular_funciones(funciones_count: dict, total_interacciones: int = None) 
     
     Args:
         funciones_count: Dict con conteos de funciones
-        total_interacciones: Total de interacciones para calcular porcentajes (si no se proporciona, usa sum(funciones_count))
+        total_interacciones: Total de interacciones para calcular porcentajes
     """
     
-    # Definir las 6 funciones predeterminadas con sus colores
+    # Definir las 12 funciones predeterminadas con sus colores
     funciones_predefinidas = {
-        "redacción": {
+        "Redacción / mejora de texto": {
             "label": "Redacción / mejora de texto",
             "description": "Ayuda en redacción y mejora de textos",
             "color": "bg-blue-500",
             "hex": "#3B82F6"
         },
-        "generación_ideas": {
-            "label": "Generación de ideas",
-            "description": "Generación de ideas y propuestas",
-            "color": "bg-green-500",
-            "hex": "#10B981"
-        },
-        "orientación_metodológica": {
-            "label": "Orientación metodológica",
-            "description": "Orientación sobre métodos y procesos",
-            "color": "bg-purple-500",
-            "hex": "#A855F7"
-        },
-        "búsqueda_información": {
+        "Búsqueda de información": {
             "label": "Búsqueda de información",
             "description": "Búsqueda y acceso a información",
             "color": "bg-orange-500",
             "hex": "#F97316"
         },
-        "revisión_teórica": {
-            "label": "Revisión teórica",
+        "Generación de ideas": {
+            "label": "Generación de ideas",
+            "description": "Generación de ideas y propuestas",
+            "color": "bg-green-500",
+            "hex": "#10B981"
+        },
+        "Orientación metodológica": {
+            "label": "Orientación metodológica",
+            "description": "Orientación sobre métodos y procesos",
+            "color": "bg-purple-500",
+            "hex": "#A855F7"
+        },
+        "Revisión conceptual o teórica": {
+            "label": "Revisión conceptual o teórica",
             "description": "Revisión y explicación teórica",
             "color": "bg-cyan-500",
             "hex": "#06B6D4"
         },
-        "evaluación": {
-            "label": "Evaluación",
+        "Evaluación o retroalimentación": {
+            "label": "Evaluación o retroalimentación",
             "description": "Evaluación y crítica constructiva",
             "color": "bg-rose-500",
             "hex": "#F43F5E"
+        },
+        "Pregunta para pensar": {
+            "label": "Pregunta para pensar",
+            "description": "Preguntas reflexivas",
+            "color": "bg-yellow-500",
+            "hex": "#EAB308"
+        },
+        "Retroalimentación": {
+            "label": "Retroalimentación",
+            "description": "Retroalimentación constructiva",
+            "color": "bg-indigo-500",
+            "hex": "#6366F1"
+        },
+        "Andamiaje": {
+            "label": "Andamiaje",
+            "description": "Apoyo gradual del aprendizaje",
+            "color": "bg-teal-500",
+            "hex": "#14B8A6"
+        },
+        "Argumentación": {
+            "label": "Argumentación",
+            "description": "Desarrollo de argumentos",
+            "color": "bg-fuchsia-500",
+            "hex": "#D946EF"
+        },
+        "Metacognición": {
+            "label": "Metacognición",
+            "description": "Reflexión sobre el propio aprendizaje",
+            "color": "bg-lime-500",
+            "hex": "#84CC16"
+        },
+        "Contraargumentación": {
+            "label": "Contraargumentación",
+            "description": "Presentación de argumentos contrarios",
+            "color": "bg-sky-500",
+            "hex": "#0EA5E9"
         },
     }
     
@@ -329,44 +384,80 @@ def _calcular_funciones(funciones_count: dict, total_interacciones: int = None) 
 
 
 def _get_empty_functions() -> list:
-    """Retorna estructura vacía de funciones para cuando no hay datos."""
+    """Retorna estructura vacía de las 12 funciones para cuando no hay datos."""
     
     funciones_predefinidas = {
-        "redacción": {
+        "Redacción / mejora de texto": {
             "label": "Redacción / mejora de texto",
             "description": "Ayuda en redacción y mejora de textos",
             "color": "bg-blue-500",
             "hex": "#3B82F6"
         },
-        "generación_ideas": {
-            "label": "Generación de ideas",
-            "description": "Generación de ideas y propuestas",
-            "color": "bg-green-500",
-            "hex": "#10B981"
-        },
-        "orientación_metodológica": {
-            "label": "Orientación metodológica",
-            "description": "Orientación sobre métodos y procesos",
-            "color": "bg-purple-500",
-            "hex": "#A855F7"
-        },
-        "búsqueda_información": {
+        "Búsqueda de información": {
             "label": "Búsqueda de información",
             "description": "Búsqueda y acceso a información",
             "color": "bg-orange-500",
             "hex": "#F97316"
         },
-        "revisión_teórica": {
-            "label": "Revisión teórica",
+        "Generación de ideas": {
+            "label": "Generación de ideas",
+            "description": "Generación de ideas y propuestas",
+            "color": "bg-green-500",
+            "hex": "#10B981"
+        },
+        "Orientación metodológica": {
+            "label": "Orientación metodológica",
+            "description": "Orientación sobre métodos y procesos",
+            "color": "bg-purple-500",
+            "hex": "#A855F7"
+        },
+        "Revisión conceptual o teórica": {
+            "label": "Revisión conceptual o teórica",
             "description": "Revisión y explicación teórica",
             "color": "bg-cyan-500",
             "hex": "#06B6D4"
         },
-        "evaluación": {
-            "label": "Evaluación",
+        "Evaluación o retroalimentación": {
+            "label": "Evaluación o retroalimentación",
             "description": "Evaluación y crítica constructiva",
             "color": "bg-rose-500",
             "hex": "#F43F5E"
+        },
+        "Pregunta para pensar": {
+            "label": "Pregunta para pensar",
+            "description": "Preguntas reflexivas",
+            "color": "bg-yellow-500",
+            "hex": "#EAB308"
+        },
+        "Retroalimentación": {
+            "label": "Retroalimentación",
+            "description": "Retroalimentación constructiva",
+            "color": "bg-indigo-500",
+            "hex": "#6366F1"
+        },
+        "Andamiaje": {
+            "label": "Andamiaje",
+            "description": "Apoyo gradual del aprendizaje",
+            "color": "bg-teal-500",
+            "hex": "#14B8A6"
+        },
+        "Argumentación": {
+            "label": "Argumentación",
+            "description": "Desarrollo de argumentos",
+            "color": "bg-fuchsia-500",
+            "hex": "#D946EF"
+        },
+        "Metacognición": {
+            "label": "Metacognición",
+            "description": "Reflexión sobre el propio aprendizaje",
+            "color": "bg-lime-500",
+            "hex": "#84CC16"
+        },
+        "Contraargumentación": {
+            "label": "Contraargumentación",
+            "description": "Presentación de argumentos contrarios",
+            "color": "bg-sky-500",
+            "hex": "#0EA5E9"
         },
     }
     

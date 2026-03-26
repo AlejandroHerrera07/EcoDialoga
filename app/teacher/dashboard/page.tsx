@@ -7,6 +7,43 @@ import { Button, Icon } from "@/app/components/ui";
 import { useTeacherDashboard, useGroups } from "@/lib/hooks";
 import { FunctionMetric, DashboardMessage } from "@/lib/types";
 
+// ─────────────────────────────────────────────
+// Custom Tooltip para la gráfica de funciones
+// ─────────────────────────────────────────────
+
+function FunctionTooltip({ active, payload, position }: any) {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload as FunctionMetric;
+    return (
+      <div 
+        className="bg-white rounded-lg p-4 shadow-xl border border-gray-200 z-50 whitespace-nowrap"
+        style={{
+          transform: 'translateY(-120%)',
+          pointerEvents: 'auto'
+        }}
+      >
+        <p className="text-sm font-bold text-neutral-text mb-1">
+          {data.label}
+        </p>
+        <p className="text-xs text-subtle-text mb-3">
+          {data.description}
+        </p>
+        <div className="flex flex-col gap-2 text-xs">
+          <div className="flex justify-between gap-4">
+            <span className="text-subtle-text">Porcentaje:</span>
+            <span className="font-bold text-neutral-text">{data.value.toFixed(1)}%</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-subtle-text">Respuestas:</span>
+            <span className="font-bold text-neutral-text">{data.count || 0}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 interface AnimatedCounterProps {
   value: number;
   suffix?: string;
@@ -248,8 +285,7 @@ function AnimatedDonutChart({ functionData, totalInteractions }: { functionData:
                 ))}
               </Pie>
               <Tooltip 
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                itemStyle={{ color: '#1e293b', fontSize: '12px', fontWeight: 600 }}
+                content={<FunctionTooltip />}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -258,7 +294,7 @@ function AnimatedDonutChart({ functionData, totalInteractions }: { functionData:
               0
             </span>
             <span className="text-xs text-subtle-text font-medium">
-              Consultas
+              Interacciones
             </span>
           </div>
         </div>
@@ -402,7 +438,7 @@ export default function TeacherDashboardPage() {
                 />
                 <AnimatedDonutChart 
                   functionData={metrics.Cada_funcion} 
-                  totalInteractions={metrics.Cada_funcion.reduce((acc, curr) => acc + curr.value, 0)} 
+                  totalInteractions={metrics.Cada_funcion.reduce((acc, curr) => acc + (curr.count || 0), 0)} 
                 />
               </div>
             </>
