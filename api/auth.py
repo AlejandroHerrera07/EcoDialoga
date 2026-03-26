@@ -82,7 +82,7 @@ def login(group_code: str, student_code: str) -> dict:
         # Esto evita el error de 'null value in column sesion_id'
         sesion_res = supabase.table("sesiones").insert({
             "grupo_id": grupo_db_id,
-            "momento_proceso": "Diseño"
+            "codigo_grupo": grupo_code_val,
         }).execute()
 
         if not sesion_res.data:

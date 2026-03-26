@@ -341,6 +341,7 @@ export default function TeacherDashboardPage() {
   const [msgDate, setMsgDate] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [filteredMessages, setFilteredMessages] = useState<DashboardMessage[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleSearchMessages = () => {
     if (!msgGroup && !msgDate) return;
@@ -353,6 +354,59 @@ export default function TeacherDashboardPage() {
     
     setFilteredMessages(results);
     setHasSearched(true);
+  };
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Obtener token del localStorage
+      const token = typeof window !== 'undefined' ? localStorage.getItem('eco_token') : null;
+      
+      if (!token) {
+        alert('No hay sesión activa. Por favor, inicia sesión de nuevo.');
+        return;
+      }
+      
+      // Construir parámetros de query
+      const params = new URLSearchParams();
+      if (panelGroup) {
+        params.append('codigo_grupo', panelGroup);
+      }
+      
+      // Build the API URL
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const exportUrl = `${apiUrl}/export/download?${params.toString()}`;
+      
+      // Hacer la petición al backend
+      const response = await fetch(exportUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
+      // Obtener el blob y crear descarga
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data_ecodialoga.zip';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+    } catch (error) {
+      console.error('Error exportando datos:', error);
+      alert('Error al descargar los datos. Por favor, intenta de nuevo.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   useEffect(() => {
@@ -394,8 +448,14 @@ export default function TeacherDashboardPage() {
             onChange={(e) => setPanelDate(e.target.value)}
             className="bg-white border border-slate-200 text-slate-700 text-sm rounded-lg outline-none focus:ring-2 focus:ring-mint-accent focus:border-mint-accent block p-2.5 shadow-sm min-w-[140px] cursor-pointer"
           />
-          <Button variant="teal" icon="download" className="hover:scale-105 active:scale-95 transition-transform">
-            Exportar
+          <Button 
+            variant="teal" 
+            icon="download" 
+            onClick={handleExport}
+            disabled={isExporting}
+            className="hover:scale-105 active:scale-95 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isExporting ? "Exportando..." : "Exportar"}
           </Button>
         </div>
       </header>

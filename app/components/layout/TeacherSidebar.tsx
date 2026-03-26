@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/app/components/ui";
+import { useState } from "react";
+import { apiClient } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
 const LOGO_URL =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAx4KN6gBYYFBYiChWfhlgZ8a6ruIF-xlEk0m7qTgSW_a_bWzcsJ2T90W0ZYWb2mUeVROjsAbchMJ8Zp9m6ZjkirLk-bf-eFIsrSozYGNDolR6EvsiEK9xTolZQdAgup8aAfjfGXUDuLrH8HnRF44KTR1fpv5nhB9xCBEdCq3bGW_Vd4YRRmQvTAfH1d_1XJsbd7V06J-aDuK_tkc5wXklik3zompWxKv42SPyG4tIV-K4cuDOSKPfakjhMBgvjvQpCqUWLzkxd7Q";
@@ -29,6 +32,35 @@ interface TeacherSidebarProps {
 
 export function TeacherSidebar({ className, onLogout, isOpen, onClose }: TeacherSidebarProps) {
   const pathname = usePathname();
+  const [momento, setMomento] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleMomentoChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nuevoMomento = e.target.value;
+    setMomento(nuevoMomento);
+    setIsUpdating(true);
+    setMessage(null);
+
+    try {
+      const response = await apiClient.post<{ status: string; message: string }>(
+        API_ENDPOINTS.TEACHER_UPDATE_MOMENTO,
+        { momento: nuevoMomento }
+      );
+
+      if (response) {
+        setMessage({ type: "success", text: `✓ Momento actualizado a '${nuevoMomento}'` });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      const errorMessage = error?.message || "Error al actualizar";
+      setMessage({ type: "error", text: errorMessage });
+      setMomento("");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <>
@@ -108,6 +140,36 @@ export function TeacherSidebar({ className, onLogout, isOpen, onClose }: Teacher
             );
           })}
         </nav>
+
+        {/* Momento Selector */}
+        <div className="px-4 py-4 border-t border-slate-100 bg-slate-50">
+          <label className="block text-xs font-semibold text-slate-600 mb-2">
+            Momento de Sesión
+          </label>
+          <select
+            value={momento}
+            onChange={handleMomentoChange}
+            disabled={isUpdating}
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">Seleccionar momento...</option>
+            <option value="Diseño">Diseño</option>
+            <option value="Revisión">Revisión</option>
+            <option value="Implementación">Implementación</option>
+          </select>
+          
+          {/* Mensajes de estado */}
+          {message && (
+            <div className={cn(
+              "mt-2 p-2 rounded-lg text-xs font-medium transition-all",
+              message.type === "success" 
+                ? "bg-green-100 text-green-700" 
+                : "bg-red-100 text-red-700"
+            )}>
+              {message.text}
+            </div>
+          )}
+        </div>
 
         {/* User Profile */}
         <div className="p-4 border-t border-slate-100 flex flex-col gap-3 shrink-0">

@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from functools import wraps
 from flask_cors import CORS
 from database import get_supabase_client, save_interaction
 from workflow import process_ai_response, evaluate_response_metrics
 from auth import login as auth_login, get_user_from_token
 from dashboard import get_dashboard_metrics, get_recent_messages, get_grupos_list
+from export import export_data_to_zip
 
 app = Flask(__name__)
 CORS(app)
@@ -364,6 +365,90 @@ def get_groups(user=None):
     except Exception as e:
         print(f"Error en get_groups: {str(e)}")
         return jsonify([]), 500
+
+@app.route('/teacher/update-momento', methods=['POST'])
+@require_auth
+def update_momento_handler(user=None):
+    """
+    Endpoint para actualizar el momento de sesión (Diseño, Revisión, Implementación).
+    
+    Body:
+      { "momento": "Diseño" | "Revisión" | "Implementación" }
+    
+    Retorna:
+      { "status": "success", "message": "Momento actualizado correctamente" }
+    """
+    try:
+        data = request.json
+        momento = data.get("momento")
+        
+        # Validar que el momento sea uno de los valores permitidos
+        valores_permitidos = ["Diseño", "Revisión", "Implementación"]
+        if not momento or momento not in valores_permitidos:
+            return jsonify({
+                "status": "error",
+                "message": f"Momento debe ser uno de: {', '.join(valores_permitidos)}"
+            }), 400
+        
+        # Llamar la función de Supabase
+        response = supabase.rpc("update_default_sesiones_momento", {
+            "p_nuevo_momento": momento
+        }).execute()
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Momento actualizado a '{momento}' correctamente"
+        }), 200
+    
+    except Exception as e:
+        print(f"Error en update_momento_handler: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/export/download', methods=['GET'])
+@require_auth
+def export_download(user=None):
+    """
+    Endpoint para descargar ZIP con todos los CSVs de datos.
+    Query params (opcionales):
+      - codigo_grupo: string (ej: "ECO-2026-A") - Si no se proporciona, exporta todos
+    
+    Retorna:
+      ZIP con 5 CSVs:
+        - grupos.csv
+        - usuarios.csv
+        - sesiones.csv
+        - interacciones.csv
+        - resumen.csv
+    """
+    try:
+        # Obtener código del grupo (opcional)
+        codigo_grupo = request.args.get('codigo_grupo')
+        
+        # Si el usuario es maestro sin código_grupo específico, usar su grupo
+        if codigo_grupo is None and 'groupCode' in user:
+            codigo_grupo = user['groupCode']
+        
+        # Generar ZIP
+        zip_buffer = export_data_to_zip(supabase, codigo_grupo=codigo_grupo)
+        
+        # Retornar ZIP como descarga
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"data_ecodialoga_{timestamp}.zip"
+        
+        return send_file(
+            zip_buffer,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=filename
+        )
+    
+    except Exception as e:
+        print(f"Error en export_download: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # ─────────────────────────────────────────────
 # HEALTH CHECK
