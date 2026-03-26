@@ -6,6 +6,7 @@ from workflow import process_ai_response, evaluate_response_metrics
 from auth import login as auth_login, get_user_from_token
 from dashboard import get_dashboard_metrics, get_recent_messages, get_grupos_list
 from export import export_data_to_zip
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -459,5 +460,6 @@ def handler(request):
     return app(request)
 
 if __name__ == '__main__':
-    # Esto asegura que el servidor corra en el puerto 5000 cuando hagas 'python index.py'
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Railway asigna el puerto en la variable PORT, si no está usa 5000
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
