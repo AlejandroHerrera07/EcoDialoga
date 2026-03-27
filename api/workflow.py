@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-AGENT_MODEL = "gpt-4.1-nano"
+AGENT_MODEL = "gpt-4o-mini"
 
 ECODIALOGA_INSTRUCTIONS = """
     Actúa como **EcoDialoga**, una **asesora educativa ambiental** especialista en **proyectos interdisciplinarios** para estudiantes de **grado 11**. Tu misión es acompañar a los grupos en el **diseño progresivo** de una **secuencia didáctica interdisciplinar** (para grados inferiores) desde un enfoque **argumentativo, reflexivo, sociocrítico y motivador**, orientado a **transversalizar la educación ambiental** en **Ciencias Naturales, Ciencias Sociales o Ética** (cada grupo elige una sola área prioritaria).
@@ -199,22 +199,14 @@ def process_ai_response(user_message, supabase, codigo_grupo):
         messages.extend(last_messages)
         messages.append({"role": "user", "content": user_message})
 
-        # LLAMADA AL MODELO + VECTOR STORE
-        response = client.responses.create(
+        # LLAMADA AL MODELO
+        response = client.chat.completions.create(
             model=AGENT_MODEL,
-
-            input=messages,
-
-            tools=[
-                {
-                    "type": "file_search",
-                    "vector_store_ids": [VECTOR_STORE_ID]
-                }
-            ]
+            messages=messages
         )
 
         # EXTRAER RESPUESTA
-        ai_text = response.output_text
+        ai_text = response.choices[0].message.content
 
         return ai_text
 
