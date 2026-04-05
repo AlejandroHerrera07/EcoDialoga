@@ -1,0 +1,126 @@
+2026-04-02 08:53:09,460 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 08:53:09,462 - __main__ - INFO - Obteniendo token para: usuario@example.com
+2026-04-02 08:56:48,106 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 08:56:48,109 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 08:56:49,979 - __main__ - INFO - ============================================================
+2026-04-02 08:56:49,981 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-02 08:56:49,981 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-02 08:56:49,981 - __main__ - INFO - ============================================================
+2026-04-02 08:56:50,611 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-02 08:56:50,612 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 08:56:50,613 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 08:56:50,614 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-02 08:56:50,614 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-02 08:56:50,615 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 08:56:50,615 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 08:56:50,616 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 08:56:50,616 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 08:56:50,617 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-02 08:56:52,165 - __main__ - INFO - [Sim-User 3] Status: 500 - Tiempo: 1.55s
+2026-04-02 08:56:52,171 - __main__ - INFO - [Sim-User 4] Status: 500 - Tiempo: 1.55s
+2026-04-02 08:56:52,312 - __main__ - INFO - [Sim-User 4] Status: 500 - Tiempo: 1.70s
+2026-04-02 08:56:52,316 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 1.70s
+2026-04-02 08:56:52,319 - __main__ - INFO - [Sim-User 0] Status: 500 - Tiempo: 1.71s
+2026-04-02 08:56:52,321 - __main__ - INFO - [Sim-User 1] Status: 500 - Tiempo: 1.71s
+2026-04-02 08:56:52,323 - __main__ - INFO - [Sim-User 0] Status: 500 - Tiempo: 1.71s
+2026-04-02 08:56:52,328 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 1.71s
+2026-04-02 08:56:52,330 - __main__ - INFO - [Sim-User 1] Status: 500 - Tiempo: 1.72s
+2026-04-02 08:56:52,331 - __main__ - INFO - [Sim-User 3] Status: 500 - Tiempo: 1.72s
+2026-04-02 09:00:58,286 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 09:00:58,290 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 09:00:59,588 - __main__ - INFO - ============================================================
+2026-04-02 09:00:59,589 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-02 09:00:59,589 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-02 09:00:59,589 - __main__ - INFO - ============================================================
+2026-04-02 09:01:00,236 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-02 09:01:00,236 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 09:01:00,238 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 09:01:00,238 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-02 09:01:00,239 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-02 09:01:00,239 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 09:01:00,240 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 09:01:00,241 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 09:01:00,241 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 09:01:00,242 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-02 09:03:04,014 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 09:03:04,017 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 09:03:44,342 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 09:03:44,344 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 09:05:00,396 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 09:05:00,398 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 09:08:34,207 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-02 09:08:34,209 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-02 09:08:36,004 - __main__ - INFO - ============================================================
+2026-04-02 09:08:36,004 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-02 09:08:36,004 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-02 09:08:36,004 - __main__ - INFO - ============================================================
+2026-04-02 09:08:36,623 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-02 09:08:36,682 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 09:08:36,683 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-02 09:08:36,683 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-02 09:08:36,684 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-02 09:08:36,684 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 09:08:36,684 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-02 09:08:36,685 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 09:08:36,685 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-02 09:08:36,686 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-02 09:08:45,079 - __main__ - INFO - [Sim-User 2] Status: 200 - Tiempo: 8.40s
+2026-04-02 09:08:46,363 - __main__ - INFO - [Sim-User 3] Status: 200 - Tiempo: 9.68s
+2026-04-05 11:26:56,602 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-05 11:26:56,605 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-05 11:26:58,729 - __main__ - INFO - ============================================================
+2026-04-05 11:26:58,729 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-05 11:26:58,729 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-05 11:26:58,729 - __main__ - INFO - ============================================================
+2026-04-05 11:26:59,353 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-05 11:26:59,354 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:26:59,354 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:26:59,355 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:26:59,356 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:26:59,356 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:26:59,357 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:26:59,357 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:26:59,357 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:26:59,358 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-05 11:27:06,206 - __main__ - INFO - [Sim-User 4] Status: 200 - Tiempo: 6.85s
+2026-04-05 11:27:06,580 - __main__ - INFO - [Sim-User 4] Status: 200 - Tiempo: 7.22s
+2026-04-05 11:27:07,344 - __main__ - INFO - [Sim-User 2] Status: 200 - Tiempo: 7.99s
+2026-04-05 11:27:08,484 - __main__ - INFO - [Sim-User 1] Status: 200 - Tiempo: 9.13s
+2026-04-05 11:32:34,029 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-05 11:32:34,030 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-05 11:32:35,696 - __main__ - INFO - ============================================================
+2026-04-05 11:32:35,697 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-05 11:32:35,697 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-05 11:32:35,697 - __main__ - INFO - ============================================================
+2026-04-05 11:32:36,314 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-05 11:32:36,316 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:32:36,316 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:32:36,316 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:32:36,317 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:32:36,317 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:32:36,317 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:32:36,317 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:32:36,318 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:32:36,318 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-05 11:32:44,567 - __main__ - INFO - [Sim-User 4] Status: 200 - Tiempo: 8.25s
+2026-04-05 11:32:44,914 - __main__ - INFO - [Sim-User 2] Status: 200 - Tiempo: 8.60s
+2026-04-05 11:32:45,006 - __main__ - INFO - [Sim-User 2] Status: 200 - Tiempo: 8.69s
+2026-04-05 11:32:45,466 - __main__ - INFO - [Sim-User 0] Status: 200 - Tiempo: 9.15s
+2026-04-05 11:34:57,243 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-05 11:34:57,244 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-05 11:34:58,062 - __main__ - INFO - ============================================================
+2026-04-05 11:34:58,062 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-05 11:34:58,062 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-05 11:34:58,063 - __main__ - INFO - ============================================================
+2026-04-05 11:34:58,680 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-05 11:34:58,681 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:34:58,682 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-05 11:34:58,683 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:34:58,683 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-05 11:34:58,683 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:34:58,684 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-05 11:34:58,684 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:34:58,684 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-05 11:34:58,685 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
+2026-04-05 11:34:59,360 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 0.68s
+2026-04-05 11:34:59,361 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 0.68s

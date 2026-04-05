@@ -125,6 +125,7 @@ Con base en este contexto, acompaña al grupo en el diseño de su secuencia did�
 def fetch_last_messages(supabase, codigo_grupo, limit=10):
     """
     Obtiene los últimos mensajes de un grupo desde la tabla interacciones.
+    Formatea para Responses API con contenido estructurado.
     
     Args:
         supabase: Cliente de Supabase
@@ -166,6 +167,7 @@ def fetch_last_messages(supabase, codigo_grupo, limit=10):
 def process_ai_response(user_message, supabase, codigo_grupo):
     """
     Procesa un mensaje del usuario y retorna respuesta del modelo de IA.
+    Usa Responses API con acceso a vector store.
     
     Args:
         user_message: Mensaje del usuario
@@ -186,28 +188,52 @@ def process_ai_response(user_message, supabase, codigo_grupo):
         last_messages = fetch_last_messages(supabase, codigo_grupo, 10)
 
         # ARMAR CONTEXTO
-        messages = [{"role": "system", "content": ECODIALOGA_INSTRUCTIONS}]
+        messages = [
+            {
+                "role": "system",
+                "content": ECODIALOGA_INSTRUCTIONS
+            }
+        ]
         
         # Agregar contexto del grupo si está disponible
         if grupo_context:
             messages.append({
-                "role": "assistant",
+                "role": "user",
                 "content": grupo_context
             })
         
-        # Agregar historial y mensaje del usuario
+        # Agregar historial (ya viene con formato correcto de fetch_last_messages)
         messages.extend(last_messages)
-        messages.append({"role": "user", "content": user_message})
+        
+        # Agregar mensaje del usuario
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
 
-        # LLAMADA AL MODELO
-        response = client.chat.completions.create(
+        # LLAMADA AL MODELO + VECTOR STORE (Responses API)
+        response = client.responses.create(
             model=AGENT_MODEL,
-            messages=messages
+            input=messages,
+            tools=[
+                {
+                    "type": "file_search",
+                    "vector_store_ids": [VECTOR_STORE_ID]
+                }
+            ]
         )
 
-        # EXTRAER RESPUESTA
-        ai_text = response.choices[0].message.content
-
+        # EXTRAER RESPUESTA - El output contiene tool calls y messages
+        ai_text = ""
+        if hasattr(response, 'output') and isinstance(response.output, list):
+            for item in response.output:
+                # Buscar ResponseOutputMessage
+                if hasattr(item, '__class__') and item.__class__.__name__ == 'ResponseOutputMessage':
+                    if hasattr(item, 'content') and isinstance(item.content, list):
+                        for content_item in item.content:
+                            if hasattr(content_item, 'text'):
+                                ai_text += content_item.text
+        
         return ai_text
 
     except Exception as e:

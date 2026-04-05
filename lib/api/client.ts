@@ -58,7 +58,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   /** AbortSignal for cancellation */
   signal?: AbortSignal;
-  /** Custom timeout in ms (default 15 000) */
+  /** Custom timeout in ms (default 60 000 / 60s) */
   timeout?: number;
 }
 
@@ -68,7 +68,7 @@ async function request<T>(
   body?: unknown,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { public: isPublic = false, headers = {}, signal, timeout = 15_000 } = options;
+  const { public: isPublic = false, headers = {}, signal, timeout = 60_000 } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);

@@ -467,5 +467,5 @@ def handler(request):
 if __name__ == '__main__':
     # Railway asigna el puerto en la variable PORT, si no está usa 5000
     port = int(os.getenv('PORT', 5000))
-    debug = os.getenv('FLASK_ENV') == 'development'
+    debug = os.getenv('FLASK_ENV', 'development') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug)

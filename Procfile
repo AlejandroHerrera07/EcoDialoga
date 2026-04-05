@@ -1,1 +1,1 @@
-web: gunicorn -w 4 -b 0.0.0.0:$PORT api.index:app
+gunicorn -w 2 --threads 4 -b 0.0.0.0:$PORT index:app
