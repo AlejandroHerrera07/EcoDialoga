@@ -43,3 +43,18 @@ def save_interaction(supabase, sesion_id, role, content, group_code, student_id=
             data["funcion_utilizada"] = funcion_utilizada
         
     return supabase.table("interacciones").insert(data).execute()
+
+
+def update_interaction_metrics(supabase, interaccion_id, es_relevante, calidad_respuesta, funcion_utilizada):
+    """Actualiza una interacción con las métricas calculadas."""
+    data = {}
+    if es_relevante is not None:
+        data["es_relevante"] = es_relevante
+    if calidad_respuesta is not None:
+        data["calidad_respuesta"] = calidad_respuesta
+    if funcion_utilizada is not None:
+        data["funcion_utilizada"] = funcion_utilizada
+    
+    if data:
+        return supabase.table("interacciones").update(data).eq("id", interaccion_id).execute()
+    return None

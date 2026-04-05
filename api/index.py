@@ -1,16 +1,37 @@
 from flask import Flask, request, jsonify, send_file
 from functools import wraps
 from flask_cors import CORS
-from database import get_supabase_client, save_interaction
+from database import get_supabase_client, save_interaction, update_interaction_metrics
 from workflow import process_ai_response, evaluate_response_metrics
 from auth import login as auth_login, get_user_from_token
 from dashboard import get_dashboard_metrics, get_recent_messages, get_grupos_list
 from export import export_data_to_zip
 import os
+from threading import Thread
 
 app = Flask(__name__)
 CORS(app)
 supabase = get_supabase_client()
+
+# ─────────────────────────────────────────────
+# Función para procesar métricas en background
+# ─────────────────────────────────────────────
+
+def evaluate_and_save_metrics(user_msg, ai_text, supabase, group_code, sesion_id, respuesta_id):
+    """Evalúa métricas y las guarda sin bloquear la respuesta."""
+    try:
+        metrics = evaluate_response_metrics(user_msg, ai_text, supabase, group_code)
+        
+        # Actualizar la interacción con las métricas
+        update_interaction_metrics(
+            supabase, 
+            respuesta_id,
+            metrics.get("es_relevante"),
+            metrics.get("calidad_respuesta"),
+            metrics.get("funcion_utilizada")
+        )
+    except Exception as e:
+        print(f"Error evaluando métricas en background: {str(e)}")
 
 # ─────────────────────────────────────────────
 # Middleware de autenticación
@@ -140,15 +161,15 @@ def chat_handler(user=None):
         user_msg = data.get("content")
         sesion_id = user["sesion_id"]
         group_code = user["groupCode"]  
-        student_id = user["studentCode"]  
+        student_id = user["studentCode"]
 
-        # 1. Obtener la sesión para ver si ya tiene un thread_id
-        sesion_data = supabase.table("grupos").select("thread_id").eq("codigo_grupo", group_code).single().execute()
-        current_thread_id = sesion_data.data.get("thread_id") if sesion_data.data else None
-
-        grupo_data = supabase.table("grupos").select("id").eq("codigo_grupo", group_code).single().execute()
+        # ✅ OPTIMIZACIÓN 1: Consolidar queries en una sola llamada
+        # Obtener grupo e información del estudiante en una query
+        grupo_data = supabase.table("grupos").select("id, thread_id").eq("codigo_grupo", group_code).single().execute()
         group_id = grupo_data.data.get("id")
+        current_thread_id = grupo_data.data.get("thread_id")
 
+        # Obtener ID del estudiante
         estudiante_res = supabase.table("estudiantes").select("id").eq("identificador_estudiante", student_id).single().execute()
         estudiante_id = estudiante_res.data.get("id")
         
@@ -156,29 +177,38 @@ def chat_handler(user=None):
         res_user = save_interaction(supabase, sesion_id, "user", user_msg, group_code, student_id=estudiante_id, student_code=student_id)
         pregunta_id = res_user.data[0]['id']
 
-        # 3. Procesar con OpenAI Agent Builder
+        # 3. Procesar con OpenAI (Responses API)
         ai_text = process_ai_response(user_msg, supabase, group_code)
 
-        # 4. Evaluar métricas de la respuesta del asistente
-        metrics = evaluate_response_metrics(user_msg, ai_text, supabase, group_code)
-
-        # 5. Guardar la respuesta de la IA con métricas
-        save_interaction(
+        # ✅ OPTIMIZACIÓN 2: Guardar respuesta primero sin métricas
+        res_assistant = save_interaction(
             supabase, 
             sesion_id, 
             "assistant", 
             ai_text, 
             group_code, 
-            reply_to=pregunta_id,
-            es_relevante=metrics.get("es_relevante"),
-            calidad_respuesta=metrics.get("calidad_respuesta"),
-            funcion_utilizada=metrics.get("funcion_utilizada")
+            reply_to=pregunta_id
         )
+        respuesta_id = res_assistant.data[0]['id']
 
+        # 4. ✅ Evaluar métricas en background (no bloquea respuesta)
+        metrics_thread = Thread(
+            target=evaluate_and_save_metrics,
+            args=(user_msg, ai_text, supabase, group_code, sesion_id, respuesta_id),
+            daemon=True
+        )
+        metrics_thread.start()
+
+        # Return respuesta inmediata sin esperar métricas
         return jsonify({
             "status": "success",
             "message": ai_text,
-            "metrics": metrics
+            "metrics": {
+                "es_relevante": None,
+                "calidad_respuesta": None,
+                "funcion_utilizada": None
+            },
+            "note": "Métricas se procesarán en background"
         })
 
     except Exception as e:
