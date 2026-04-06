@@ -70,7 +70,7 @@ export function GroupInfoModal({
       newErrors.problematica = "Por favor describe la problemática";
     }
     if (!formData.grado.trim()) {
-      newErrors.grado = "Grado al que se dirige la secuencia didáctica";
+      newErrors.grado = "Por favor selecciona un grado";
     }
 
     setErrors(newErrors);
@@ -228,7 +228,7 @@ export function GroupInfoModal({
           {/* Grado */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Grado *
+              Grado sobre el que se realiza la secuencia *
             </label>
             <select
               value={formData.grado}
