@@ -217,8 +217,7 @@ def process_ai_response(user_message, supabase, codigo_grupo):
                     "vector_store_ids": [VECTOR_STORE_ID]
                 }
             ],
-            temperature=0.7,
-            max_output_tokens=400
+            temperature=0.7
         )
 
         # EXTRAER RESPUESTA - El output contiene tool calls y messages
