@@ -70,7 +70,7 @@ export function GroupInfoModal({
       newErrors.problematica = "Por favor describe la problemática";
     }
     if (!formData.grado.trim()) {
-      newErrors.grado = "Por favor selecciona un grado";
+      newErrors.grado = "Grado al que se dirige la secuencia didáctica";
     }
 
     setErrors(newErrors);

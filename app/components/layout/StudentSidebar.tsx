@@ -44,7 +44,7 @@ export function StudentSidebar({
   const handleSendSummaryMessage = async () => {
     if (sendMessage) {
       await sendMessage(
-        "Por favor, proporciona un resumen de nuestra conversación hasta ahora."
+        "Por favor, proporciona un resumen breve de nuestra conversación hasta ahora y las temáticas que está trabajando mi grupo."
       );
     }
     onSendSummaryMessage?.();
@@ -53,7 +53,7 @@ export function StudentSidebar({
   const handleSendTemplateMessage = async () => {
     if (sendMessage) {
       await sendMessage(
-        "Por favor genera una lista de los items del Anexo 10 con base en nuestra conversación hasta ahora."
+        "Genera una lista con los items del Anexo 10, usando la información de nuestra conversación. En cada item organiza la información con las temáticas que está trabajando mi grupo."
       );
     }
     onSendTemplateMessage?.();

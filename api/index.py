@@ -190,6 +190,7 @@ def chat_handler(user=None):
             reply_to=pregunta_id
         )
         respuesta_id = res_assistant.data[0]['id']
+        print(f"Respuesta guardada con ID: {respuesta_id} (sin métricas)")
 
         # 4. ✅ Evaluar métricas en background (no bloquea respuesta)
         metrics_thread = Thread(
@@ -203,12 +204,6 @@ def chat_handler(user=None):
         return jsonify({
             "status": "success",
             "message": ai_text,
-            "metrics": {
-                "es_relevante": None,
-                "calidad_respuesta": None,
-                "funcion_utilizada": None
-            },
-            "note": "Métricas se procesarán en background"
         })
 
     except Exception as e:

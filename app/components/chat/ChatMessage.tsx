@@ -120,18 +120,6 @@ export function ChatInput({
               style={{ fieldSizing: "content" } as React.CSSProperties}
             />
             <div className="flex items-center gap-2 pb-2">
-              <button
-                className="p-2 text-gray-400 hover:text-teal-accent hover:bg-gray-50 rounded-full transition-all hover:scale-110 active:scale-95"
-                title="Adjuntar imagen"
-              >
-                <Icon name="add_photo_alternate" size="md" />
-              </button>
-              <button
-                className="p-2 text-gray-400 hover:text-teal-accent hover:bg-gray-50 rounded-full transition-all hover:scale-110 active:scale-95"
-                title="Micrófono"
-              >
-                <Icon name="mic" size="md" />
-              </button>
               <button 
                 onClick={handleSend}
                 disabled={!message.trim()}
@@ -148,7 +136,7 @@ export function ChatInput({
           </div>
         </div>
         <p className="text-center text-[11px] text-gray-500 mt-3">
-EcoDialoga puede cometer errores. Por favor verifica la información importante.
+Recuerda que la docente hace seguimiento de todo el proceso.
         </p>
       </div>
     </div>
