@@ -1,80 +1,78 @@
 {
-  "timestamp": "2026-04-05T11:35:08.745685",
+  "timestamp": "2026-04-06T12:48:33.356609",
   "config": {
     "num_concurrent_users": 5,
     "messages_per_user": 2,
     "total_requests": 10,
-    "base_url": "https://ecodialoga-production.up.railway.app"
+    "base_url": "http://127.0.0.1:5000"
   },
   "summary": {
     "total": 10,
     "success": 0,
-    "timeouts": 8,
-    "errors": 2,
+    "timeouts": 10,
+    "errors": 0,
     "exceptions": 0,
-    "avg_time": 8.17660894393921
+    "avg_time": 10.032417821884156
   },
   "results": [
     {
       "user_id": 0,
       "status": "TIMEOUT",
-      "time": 10.049727439880371,
+      "time": 10.028016805648804,
       "message": "Cu\u00e9ntame 5 formas de reducir el consumo de pl\u00e1stic"
     },
     {
       "user_id": 0,
       "status": "TIMEOUT",
-      "time": 10.055789232254028,
+      "time": 10.030333995819092,
       "message": "\u00bfCu\u00e1l es la relaci\u00f3n entre los bosques y el cambio"
     },
     {
       "user_id": 1,
       "status": "TIMEOUT",
-      "time": 10.05278730392456,
+      "time": 10.032343626022339,
       "message": "\u00bfCu\u00e1l es la relaci\u00f3n entre los bosques y el cambio"
     },
     {
       "user_id": 1,
       "status": "TIMEOUT",
-      "time": 10.043664932250977,
+      "time": 10.046339511871338,
       "message": "Explica c\u00f3mo la energ\u00eda renovable puede reemplazar"
     },
     {
       "user_id": 2,
-      "status": "ERROR_500",
-      "time": 0.6765620708465576,
-      "message": "Explica c\u00f3mo la energ\u00eda renovable puede reemplazar",
-      "error": "{\"message\":\"[Errno 11] Resource temporarily unavailable\",\"status\":\"error\"}\n"
+      "status": "TIMEOUT",
+      "time": 10.048451662063599,
+      "message": "Explica c\u00f3mo la energ\u00eda renovable puede reemplazar"
     },
     {
       "user_id": 2,
-      "status": "ERROR_500",
-      "time": 0.677565336227417,
-      "message": "\u00bfQu\u00e9 es la biodiversidad y por qu\u00e9 es importante?",
-      "error": "{\"message\":\"[Errno 11] Resource temporarily unavailable\",\"status\":\"error\"}\n"
-    },
-    {
-      "user_id": 3,
       "status": "TIMEOUT",
-      "time": 10.056766033172607,
+      "time": 10.02843952178955,
       "message": "\u00bfQu\u00e9 es la biodiversidad y por qu\u00e9 es importante?"
     },
     {
       "user_id": 3,
       "status": "TIMEOUT",
-      "time": 10.054765701293945,
+      "time": 10.037444114685059,
+      "message": "\u00bfQu\u00e9 es la biodiversidad y por qu\u00e9 es importante?"
+    },
+    {
+      "user_id": 3,
+      "status": "TIMEOUT",
+      "time": 10.028340816497803,
       "message": "Dame consejos para hacer el hogar m\u00e1s sostenible"
     },
     {
       "user_id": 4,
       "status": "TIMEOUT",
-      "time": 10.051764965057373,
+      "time": 10.02824592590332,
       "message": "Dame consejos para hacer el hogar m\u00e1s sostenible"
     },
     {
       "user_id": 4,
       "status": "TIMEOUT",
-      "time": 10.046696424484253,
+      "time": 10.01622223854065,
       "message": "\u00bfC\u00f3mo afecta la contaminaci\u00f3n del agua a los ecosi"
     }
   ]

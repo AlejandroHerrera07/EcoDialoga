@@ -135,11 +135,15 @@ def get_user_from_token(authorization_header: str) -> dict:
     
     try:
         parts = authorization_header.split()
+        print(f"DEBUG get_user_from_token: auth_header parts = {len(parts)}")
         if len(parts) != 2 or parts[0].lower() != "bearer":
+            print(f"DEBUG: Parts[0] = {parts[0] if parts else 'N/A'}")
             raise ValueError("Formato de Authorization header inválido")
         
         token = parts[1]
+        print(f"DEBUG: Token a verificar: {token[:30]}...")
         payload = verify_token(token)
+        print(f"DEBUG: Payload decodificado: {payload}")
         
         # Obtener datos del estudiante usando el código del payload
         student_res = (

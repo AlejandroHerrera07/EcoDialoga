@@ -124,3 +124,19 @@
 2026-04-05 11:34:58,685 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'
 2026-04-05 11:34:59,360 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 0.68s
 2026-04-05 11:34:59,361 - __main__ - INFO - [Sim-User 2] Status: 500 - Tiempo: 0.68s
+2026-04-06 12:28:27,596 - asyncio - DEBUG - Using proactor: IocpProactor
+2026-04-06 12:28:27,598 - __main__ - INFO - Obteniendo token para grupo: G0000, estudiante: ALEDEV
+2026-04-06 12:28:29,771 - __main__ - INFO - ============================================================
+2026-04-06 12:28:29,771 - __main__ - INFO - Iniciando prueba de carga: 5 usuarios simulados
+2026-04-06 12:28:29,771 - __main__ - INFO - Token JWT reutilizado para TODAS las peticiones
+2026-04-06 12:28:29,771 - __main__ - INFO - ============================================================
+2026-04-06 12:28:30,387 - __main__ - INFO - [Sim-User 0] Enviando petición #0: 'Cuéntame 5 formas de reducir el consumo ...'
+2026-04-06 12:28:30,388 - __main__ - INFO - [Sim-User 0] Enviando petición #1: '¿Cuál es la relación entre los bosques y...'
+2026-04-06 12:28:30,388 - __main__ - INFO - [Sim-User 1] Enviando petición #0: '¿Cuál es la relación entre los bosques y...'
+2026-04-06 12:28:30,388 - __main__ - INFO - [Sim-User 1] Enviando petición #1: 'Explica cómo la energía renovable puede ...'
+2026-04-06 12:28:30,389 - __main__ - INFO - [Sim-User 2] Enviando petición #0: 'Explica cómo la energía renovable puede ...'
+2026-04-06 12:28:30,389 - __main__ - INFO - [Sim-User 2] Enviando petición #1: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-06 12:28:30,389 - __main__ - INFO - [Sim-User 3] Enviando petición #0: '¿Qué es la biodiversidad y por qué es im...'
+2026-04-06 12:28:30,390 - __main__ - INFO - [Sim-User 3] Enviando petición #1: 'Dame consejos para hacer el hogar más so...'
+2026-04-06 12:28:30,390 - __main__ - INFO - [Sim-User 4] Enviando petición #0: 'Dame consejos para hacer el hogar más so...'
+2026-04-06 12:28:30,390 - __main__ - INFO - [Sim-User 4] Enviando petición #1: '¿Cómo afecta la contaminación del agua a...'

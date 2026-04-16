@@ -106,6 +106,32 @@ export function GroupInfoModal({
             completes la siguiente información sobre tu grupo de estudio.
           </p>
 
+          {/* Problemática */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Problemática *
+            </label>
+            <textarea
+              value={formData.problematica}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  problematica: e.target.value,
+                })
+              }
+              placeholder="Describe la problemática ambiental que abordará tu grupo..."
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all resize-none ${
+                errors.problematica
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              rows={4}
+            />
+            {errors.problematica && (
+              <p className="text-red-500 text-sm mt-1">{errors.problematica}</p>
+            )}
+          </div>
+          
           {/* Area Curricular */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -196,32 +222,6 @@ export function GroupInfoModal({
             </select>
             {errors.eje_ambiental && (
               <p className="text-red-500 text-sm mt-1">{errors.eje_ambiental}</p>
-            )}
-          </div>
-
-          {/* Problemática */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Problemática *
-            </label>
-            <textarea
-              value={formData.problematica}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  problematica: e.target.value,
-                })
-              }
-              placeholder="Describe la problemática ambiental que abordará tu grupo..."
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all resize-none ${
-                errors.problematica
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-              rows={4}
-            />
-            {errors.problematica && (
-              <p className="text-red-500 text-sm mt-1">{errors.problematica}</p>
             )}
           </div>
 

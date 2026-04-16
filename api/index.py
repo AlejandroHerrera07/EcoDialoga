@@ -207,7 +207,11 @@ def chat_handler(user=None):
         })
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR EN CHAT_HANDLER: {str(e)}")
+        print(f"Traceback:\n{error_trace}")
+        return jsonify({"status": "error", "message": str(e), "details": error_trace}), 500
 
 # ─────────────────────────────────────────────
 # GRUPOS ENDPOINTS

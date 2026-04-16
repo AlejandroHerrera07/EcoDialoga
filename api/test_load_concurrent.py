@@ -36,7 +36,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ⚙️ CONFIGURACIÓN - EDITA ESTO
-BASE_URL = "https://ecodialoga-production.up.railway.app"  # URL pública Railway
+BASE_URL = "http://127.0.0.1:5000"
+#BASE_URL = "https://ecodialoga-production.up.railway.app"  # URL pública Railway
 NUM_CONCURRENT_USERS = 5
 NUM_MESSAGES_PER_USER = 2
 
