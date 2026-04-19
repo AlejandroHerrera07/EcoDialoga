@@ -408,7 +408,7 @@ def update_momento_handler(user=None):
         momento = data.get("momento")
         
         # Validar que el momento sea uno de los valores permitidos
-        valores_permitidos = ["Diseño", "Revisión", "Implementación"]
+        valores_permitidos = ["Diseño inicial", "Revisión y ajuste", "Socialización y retroalimentación"]
         if not momento or momento not in valores_permitidos:
             return jsonify({
                 "status": "error",

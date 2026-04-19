@@ -155,9 +155,9 @@ export function TeacherSidebar({ className, onLogout, isOpen, onClose, userName 
             className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="">Seleccionar momento...</option>
-            <option value="Diseño">Diseño</option>
-            <option value="Revisión">Revisión</option>
-            <option value="Implementación">Implementación</option>
+            <option value="Diseño inicial">Diseño inicial</option>
+            <option value="Revisión y ajuste">Revisión y ajuste</option>
+            <option value="Socialización y retroalimentación">Socialización y retroalimentación</option>
           </select>
           
           {/* Mensajes de estado */}
