@@ -150,7 +150,7 @@ def get_recent_messages(
     supabase: Client,
     codigo_grupo: str = None,
     fecha: str = None,
-    limit: int = 50,
+    limit: int = 15,
 ):
     """
     Obtiene mensajes recientes del dashboard (últimas N interacciones de asistente).
@@ -162,13 +162,14 @@ def get_recent_messages(
         limit: Número máximo de mensajes a retornar (default: 50)
     
     Returns:
-        List de mensajes
+        List de mensajes transformados a la estructura del frontend
     """
     
     try:
+        # Obtener interacciones del asistente
         query = supabase.table("interacciones").select(
-            "id, contenido, es_relevante, calidad_respuesta, funcion_utilizada, created_at, rol"
-        ).eq("rol", "assistant")
+            "id, contenido, created_at, codigo_grupo, identificador_estudiante"
+        ).eq("rol", "user")
         
         if codigo_grupo:
             query = query.eq("codigo_grupo", codigo_grupo)
@@ -178,21 +179,42 @@ def get_recent_messages(
             query = query.gte("created_at", f"{fecha}T00:00:00")
             query = query.lt("created_at", f"{fecha}T23:59:59")
         
-        mensajes = query.order("created_at", desc=True).limit(limit).execute().data
+        mensajes_raw = query.order("created_at", desc=True).limit(limit).execute().data
         
-        return {
-            "status": "success",
-            "data": mensajes,
-            "total": len(mensajes)
-        }
+        # Transformar datos a la estructura esperada por el frontend
+        mensajes_transformados = []
+        for msg in mensajes_raw:
+            # Obtener el nombre del estudiante usando una query separada
+            student_name = "Desconocido"
+            identificador_estudiante = msg.get("identificador_estudiante")
+            if identificador_estudiante:
+                try:
+                    student_query = supabase.table("estudiantes").select("nombre_anonimo").eq("identificador_estudiante", identificador_estudiante).single().execute()
+                    if student_query.data:
+                        student_name = student_query.data.get("nombre_anonimo", "Desconocido")
+                except Exception as e:
+                    print(f"Error obteniendo nombre del estudiante {identificador_estudiante}: {str(e)}")
+                    student_name = identificador_estudiante  # Fallback: usar el ID como nombre
+            
+            # Extraer la fecha en formato YYYY-MM-DD
+            created_at = msg.get("created_at", "")
+            date_str = created_at.split("T")[0] if created_at else ""
+            
+            # Construir el mensaje transformado
+            mensaje_transformado = {
+                "id": msg.get("id"),
+                "student": student_name,
+                "date": date_str,
+                "group": msg.get("codigo_grupo", ""),
+                "content": msg.get("contenido", "")
+            }
+            mensajes_transformados.append(mensaje_transformado)
+        
+        return mensajes_transformados
     
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e),
-            "data": [],
-            "total": 0
-        }
+        print(f"Error en get_recent_messages: {str(e)}")
+        return []
 
 
 def get_grupos_list(supabase: Client):
@@ -204,7 +226,8 @@ def get_grupos_list(supabase: Client):
     """
     
     try:
-        grupos_raw = supabase.table("grupos").select("id, codigo_grupo, area_curricular, area_transversal, eje_ambiental, problematica, grado").execute().data
+        grupos = supabase.table("grupos").select("id, codigo_grupo, area_curricular, area_transversal, eje_ambiental, problematica, grado")
+        grupos_raw = grupos.order("codigo_grupo", desc=True).execute().data
         
         # Mapear campos de BD a estructura que espera el frontend
         grupos_formateados = []

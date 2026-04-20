@@ -341,19 +341,29 @@ export default function TeacherDashboardPage() {
   const [msgDate, setMsgDate] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [filteredMessages, setFilteredMessages] = useState<DashboardMessage[]>([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleSearchMessages = () => {
+  const handleSearchMessages = async () => {
     if (!msgGroup && !msgDate) return;
     
-    const results = messages.filter(msg => {
-      const matchGroup = msgGroup ? msg.group === msgGroup : true;
-      const matchDate = msgDate ? msg.date === msgDate : true;
-      return matchGroup && matchDate;
-    });
-    
-    setFilteredMessages(results);
-    setHasSearched(true);
+    try {
+      setIsLoadingMessages(true);
+      // Importar el servicio dinámicamente para evitar problemas de SSR
+      const { teacherService } = await import("@/lib/services");
+      const results = await teacherService.getRecentMessages(
+        msgGroup || null,
+        msgDate || null
+      );
+      setFilteredMessages(results);
+      setHasSearched(true);
+    } catch (error) {
+      console.error("Error al buscar mensajes:", error);
+      setFilteredMessages([]);
+      setHasSearched(true);
+    } finally {
+      setIsLoadingMessages(false);
+    }
   };
 
   const handleExport = async () => {
@@ -535,46 +545,64 @@ export default function TeacherDashboardPage() {
                 />
               </div>
               <div className="w-full sm:w-auto">
-                <Button variant="primary" icon="search" onClick={handleSearchMessages} disabled={!msgGroup && !msgDate}>
-                  Buscar
+                <Button variant="primary" icon="search" onClick={handleSearchMessages} disabled={!msgGroup && !msgDate || isLoadingMessages}>
+                  {isLoadingMessages ? "Buscando..." : "Buscar"}
                 </Button>
               </div>
             </div>
 
             {hasSearched && (
               <div className="overflow-hidden shadow ring-1 ring-black/5 sm:rounded-xl bg-white mt-4">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-mint-accent">
-                    <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#2c5c23] sm:pl-6 w-1/4">
-                        Estudiante
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#2c5c23]">
-                        Mensaje
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white">
-                    {filteredMessages.length > 0 ? (
-                      filteredMessages.map((msg) => (
-                        <tr key={msg.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {msg.student}
-                          </td>
-                          <td className="px-3 py-4 text-sm text-gray-600">
-                            {msg.content}
+                {isLoadingMessages ? (
+                  <div className="flex items-center justify-center h-32 text-mint-accent">
+                    <Icon name="progress_activity" className="animate-spin !text-4xl" />
+                  </div>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-mint-accent">
+                      <tr>
+                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#2c5c23] sm:pl-6 w-1/4">
+                          Estudiante
+                        </th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#2c5c23] w-1/4">
+                          Fecha
+                        </th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#2c5c23] w-1/4">
+                          Grupo
+                        </th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#2c5c23]">
+                          Mensaje
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 bg-white">
+                      {filteredMessages.length > 0 ? (
+                        filteredMessages.map((msg) => (
+                          <tr key={msg.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                              {msg.student}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
+                              {msg.date}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
+                              {msg.group}
+                            </td>
+                            <td className="px-3 py-4 text-sm text-gray-600">
+                              {msg.content}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-sm text-gray-500">
+                            No se encontraron mensajes para los filtros seleccionados.
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={2} className="py-8 text-center text-sm text-gray-500">
-                          No se encontraron mensajes para los filtros seleccionados.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </div>

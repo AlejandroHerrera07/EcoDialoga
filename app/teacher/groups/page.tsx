@@ -142,7 +142,7 @@ export default function GroupsPage() {
             <Input
               label="Código del Grupo"
               icon="groups"
-              placeholder="Ej. ECO-2026-A"
+              placeholder="Ej. G51101"
               value={newGroupCode}
               onChange={(e) => setNewGroupCode(e.target.value)}
               className="uppercase"
@@ -176,25 +176,25 @@ export default function GroupsPage() {
                         scope="col"
                         className="px-3 py-4 text-left text-sm font-semibold text-[#2c5c23] w-1/6"
                       >
-                        Área
+                        Área Principal
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-4 text-left text-sm font-semibold text-[#2c5c23] w-1/6"
                       >
-                        Area Transversal
+                        Área Transversal
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-4 text-left text-sm font-semibold text-[#2c5c23] w-1/6"
                       >
-                        Macro Eje
+                        Eje Ambiental
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-4 text-left text-sm font-semibold text-[#2c5c23] w-1/6"
                       >
-                        Problematica
+                        Problemática
                       </th>
                     </tr>
                   </thead>

@@ -18,7 +18,7 @@ def export_data_to_zip(supabase: Client, codigo_grupo: str = None):
     1. grupos.csv - Todas las filas con: id, codigo_grupo, area_curricular, area_transversal, eje_ambiental, problematica, grado, created_at
     2. usuarios.csv (estudiantes) - Todas las filas con: id, identificador_estudiante, codigo_grupo, nombre_anonimo, rol, consentimiento, created_at
     3. sesiones.csv - Todas las filas con: id, codigo_grupo, momento_proceso, fecha_inicio
-    4. interacciones.csv - Todas las filas con: id, sesion_id, identificador_estudiante, codigo_grupo, reply_to, contenido, rol, es_relevante, funcion_utilizada, created_at
+    4. interacciones.csv - Todas las filas con: id, momento_proceso, identificador_estudiante, codigo_grupo, reply_to, contenido, rol, es_relevante, calidad_respuesta, funcion_utilizada, created_at
     5. resumen.csv (estadísticas del dashboard)
     
     Args:
@@ -163,9 +163,14 @@ def _export_sesiones(supabase: Client, codigo_grupo: str = None) -> str:
 
 
 def _export_interacciones(supabase: Client, codigo_grupo: str = None) -> str:
-    """Exporta tabla interacciones con columnas especificadas."""
+    """Exporta tabla interacciones con columnas especificadas, reemplazando sesion_id con momento_proceso."""
     
     try:
+        # 1. Obtener todas las sesiones para mapeo sesion_id -> momento_proceso
+        sesiones_query = supabase.table("sesiones").select("id, momento_proceso").execute()
+        sesiones_map = {sesion.get("id"): sesion.get("momento_proceso", "") for sesion in sesiones_query.data}
+        
+        # 2. Obtener interacciones
         query = supabase.table("interacciones").select("id, sesion_id, identificador_estudiante, codigo_grupo, reply_to, contenido, rol, es_relevante, calidad_respuesta, funcion_utilizada, created_at")
         
         # NO filtrar por grupo - exportar TODOS
@@ -174,14 +179,18 @@ def _export_interacciones(supabase: Client, codigo_grupo: str = None) -> str:
         output = io.StringIO()
         writer = csv.DictWriter(
             output,
-            fieldnames=['id', 'sesion_id', 'identificador_estudiante', 'codigo_grupo', 'reply_to', 'contenido', 'rol', 'es_relevante', 'calidad_respuesta', 'funcion_utilizada', 'created_at']
+            fieldnames=['id', 'momento_proceso', 'identificador_estudiante', 'codigo_grupo', 'reply_to', 'contenido', 'rol', 'es_relevante', 'calidad_respuesta', 'funcion_utilizada', 'created_at']
         )
         
         writer.writeheader()
         for row in data:
+            # Obtener momento_proceso del mapeo usando sesion_id
+            sesion_id = row.get("sesion_id")
+            momento_proceso = sesiones_map.get(sesion_id, "")
+            
             writer.writerow({
                 'id': row.get('id', ''),
-                'sesion_id': row.get('sesion_id', ''),
+                'momento_proceso': momento_proceso,
                 'identificador_estudiante': row.get('identificador_estudiante', ''),
                 'codigo_grupo': row.get('codigo_grupo', ''),
                 'reply_to': row.get('reply_to', ''),

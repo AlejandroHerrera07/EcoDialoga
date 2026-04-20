@@ -173,7 +173,9 @@ export const getRecentMessages = async (
       // Enviar parámetro codigo_grupo solo si se seleccionó un grupo específico (no vacío)
       if (groupCode) url.searchParams.append("codigo_grupo", groupCode);
       if (fecha) url.searchParams.append("fecha", fecha);
-      return await apiClient.get<DashboardMessage[]>(url.pathname + url.search);
+      const response = await apiClient.get<DashboardMessage[]>(url.pathname + url.search);
+      // La respuesta ahora es directamente un array
+      return Array.isArray(response) ? response : [];
     },
     async () => {
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -198,45 +200,75 @@ export const getGroups = async (): Promise<Group[]> => {
 };
 
 export const createGroup = async (newGroupData: Partial<Group>): Promise<Group> => {
-  // TODO: Reemplazar por endpoint real:
-  // return client.post<Group>(API_ENDPOINTS.TEACHER_GROUPS, newGroupData);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  const newGroup: Group = {
-    id: Date.now().toString(),
-    code: newGroupData.code || "NUEVO",
-    area: newGroupData.area || "Nueva Área",
-    eje: newGroupData.eje || "Nuevo Eje",
-    macroEje: newGroupData.macroEje || "Nuevo Macro Eje",
-    area_transversal: newGroupData.area_transversal || "Nueva Área Transversal",
-    problematica: newGroupData.problematica || "Nueva Problemática",
-    icon: newGroupData.icon || "science",
-    iconBg: newGroupData.iconBg || "bg-blue-50",
-    iconColor: newGroupData.iconColor || "text-blue-600",
-    status: newGroupData.status || "pending",
-  };
-  MOCK_GROUPS = [newGroup, ...MOCK_GROUPS];
-  return newGroup;
+  return fallbackOnError(
+    async () => {
+      const response = await apiClient.post<Group>(
+        API_ENDPOINTS.TEACHER_GROUPS_CREATE,
+        {
+          codigo_grupo: newGroupData.code
+        }
+      );
+      return response;
+    },
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const newGroup: Group = {
+        id: Date.now().toString(),
+        code: newGroupData.code || "NUEVO",
+        area: newGroupData.area || "Nueva Área",
+        eje: newGroupData.eje || "Nuevo Eje",
+        macroEje: newGroupData.macroEje || "Nuevo Macro Eje",
+        area_transversal: newGroupData.area_transversal || "Nueva Área Transversal",
+        problematica: newGroupData.problematica || "Nueva Problemática",
+        icon: newGroupData.icon || "science",
+        iconBg: newGroupData.iconBg || "bg-blue-50",
+        iconColor: newGroupData.iconColor || "text-blue-600",
+        status: newGroupData.status || "pending",
+      };
+      MOCK_GROUPS = [newGroup, ...MOCK_GROUPS];
+      return newGroup;
+    }
+  );
 };
 
 export const getStudents = async (): Promise<Student[]> => {
-  // TODO: Reemplazar por endpoint real:
-  // return client.get<Student[]>(API_ENDPOINTS.TEACHER_STUDENTS);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  return [...MOCK_STUDENTS];
+  return fallbackOnError(
+    async () => {
+      const response = await apiClient.get<Student[]>(API_ENDPOINTS.TEACHER_STUDENTS);
+      return Array.isArray(response) ? response : [];
+    },
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return [...MOCK_STUDENTS];
+    }
+  );
 };
 
 export const createStudent = async (newStudentData: Partial<Student>): Promise<Student> => {
-  // TODO: Reemplazar por endpoint real:
-  // return client.post<Student>(API_ENDPOINTS.TEACHER_STUDENTS, newStudentData);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  const newStudent: Student = {
-    id: Date.now().toString(),
-    identifier: newStudentData.identifier || "EST-NUEVO",
-    name: newStudentData.name || "Nuevo Estudiante",
-    groupCode: newStudentData.groupCode || "NUEVO",
-  };
-  MOCK_STUDENTS = [newStudent, ...MOCK_STUDENTS];
-  return newStudent;
+  return fallbackOnError(
+    async () => {
+      const response = await apiClient.post<Student>(
+        API_ENDPOINTS.TEACHER_STUDENTS,
+        {
+          identificador_estudiante: newStudentData.identifier,
+          nombre_anonimo: newStudentData.name,
+          codigo_grupo: newStudentData.groupCode
+        }
+      );
+      return response;
+    },
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const newStudent: Student = {
+        id: Date.now().toString(),
+        identifier: newStudentData.identifier || "EST-NUEVO",
+        name: newStudentData.name || "Nuevo Estudiante",
+        groupCode: newStudentData.groupCode || "NUEVO",
+      };
+      MOCK_STUDENTS = [newStudent, ...MOCK_STUDENTS];
+      return newStudent;
+    }
+  );
 };
 
 export const getAvailableGroups = async (): Promise<string[]> => {

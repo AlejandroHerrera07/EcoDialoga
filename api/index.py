@@ -291,6 +291,72 @@ def update_group_info(codigo, user=None):
         print(f"Error en update_group_info: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/grupos', methods=['POST'])
+@require_auth
+def create_group(user=None):
+    """
+    Endpoint para crear un nuevo grupo.
+    Body: {
+        "codigo_grupo": string (ej: "ECO-2026-A")
+    }
+    """
+    try:
+        data = request.json
+        codigo_grupo = data.get("codigo_grupo")
+        
+        if not codigo_grupo:
+            return jsonify({
+                "status": "error",
+                "message": "El código del grupo es requerido"
+            }), 400
+        
+        # Validar que el grupo no exista ya
+        existing = supabase.table("grupos").select("id").eq("codigo_grupo", codigo_grupo).execute()
+        if existing.data and len(existing.data) > 0:
+            return jsonify({
+                "status": "error",
+                "message": f"El grupo con código '{codigo_grupo}' ya existe"
+            }), 409
+        
+        # Crear nuevo grupo en Supabase
+        new_group_data = {
+            "codigo_grupo": codigo_grupo
+        }
+        
+        result = supabase.table("grupos").insert(new_group_data).execute()
+        
+        if not result.data or len(result.data) == 0:
+            return jsonify({
+                "status": "error",
+                "message": "No se pudo crear el grupo"
+            }), 500
+        
+        # Transformar la respuesta a la estructura esperada por el frontend
+        grupo_creado = result.data[0]
+        grupo_respuesta = {
+            "id": grupo_creado.get("id"),
+            "code": grupo_creado.get("codigo_grupo"),
+            "area": grupo_creado.get("area_curricular", ""),
+            "area_transversal": grupo_creado.get("area_transversal", ""),
+            "eje": grupo_creado.get("eje_ambiental", ""),
+            "macroEje": grupo_creado.get("eje_ambiental", ""),
+            "problematica": grupo_creado.get("problematica", ""),
+            "icon": "science",
+            "iconBg": "bg-blue-50",
+            "iconColor": "text-blue-600",
+            "status": "active"
+        }
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Grupo '{codigo_grupo}' creado correctamente",
+            "data": grupo_respuesta
+        }), 201
+    
+    except Exception as e:
+        print(f"Error en create_group: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # ─────────────────────────────────────────────
 # DASHBOARD ENDPOINTS
 # ─────────────────────────────────────────────
@@ -340,13 +406,20 @@ def get_messages(user=None):
     Endpoint para obtener mensajes recientes del dashboard.
     Query params (todos opcionales):
       - codigo_grupo: string (ej: "ECO-2026-A")
-      - fecha_inicio: string (formato ISO: YYYY-MM-DD)
-      - fecha_fin: string (formato ISO: YYYY-MM-DD)
+      - fecha: string (formato ISO: YYYY-MM-DD)
       - limit: número (default: 50, max: 500)
     
     Retorna:
-      - data: Array de mensajes recientes
-      - total: Número total de mensajes
+      Array de mensajes recientes con estructura:
+      [
+        {
+          "id": int,
+          "student": string,
+          "date": string,
+          "group": string,
+          "content": string
+        }
+      ]
     """
     try:
         # Obtener parámetros de query
@@ -390,6 +463,131 @@ def get_groups(user=None):
     except Exception as e:
         print(f"Error en get_groups: {str(e)}")
         return jsonify([]), 500
+
+@app.route('/teacher/students', methods=['GET'])
+@require_auth
+def get_students(user=None):
+    """
+    Endpoint para obtener lista de estudiantes.
+    
+    Query params (opcionales):
+      - codigo_grupo: string (ej: "ECO-2026-A") - Filtrar por grupo específico
+    
+    Retorna:
+      Array de estudiantes con estructura: { id, identifier, name, groupCode }
+    """
+    try:
+        codigo_grupo = request.args.get('codigo_grupo')
+        
+        # Construir query
+        query = supabase.table("estudiantes").select(
+            "id, identificador_estudiante, nombre_anonimo, codigo_grupo"
+        )
+        
+        # Aplicar filtro si se especifica grupo
+        if codigo_grupo:
+            query = query.eq("codigo_grupo", codigo_grupo)
+        
+        query = query.order("codigo_grupo", desc=True)
+        result = query.execute()
+        
+        # Transformar la respuesta a la estructura esperada por el frontend
+        estudiantes_transformados = []
+        for estudiante in result.data:
+            estudiante_transformado = {
+                "id": estudiante.get("id"),
+                "identifier": estudiante.get("identificador_estudiante", ""),
+                "name": estudiante.get("nombre_anonimo", ""),
+                "groupCode": estudiante.get("codigo_grupo", "")
+            }
+            estudiantes_transformados.append(estudiante_transformado)
+        
+        return jsonify(estudiantes_transformados), 200
+    
+    except Exception as e:
+        print(f"Error en get_students: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/teacher/students', methods=['POST'])
+@require_auth
+def create_student(user=None):
+    """
+    Endpoint para crear un nuevo estudiante.
+    
+    Body: {
+        "identificador_estudiante": string (ej: "EST-001"),
+        "nombre_anonimo": string (ej: "Juan Pérez"),
+        "codigo_grupo": string (ej: "ECO-2026-A")
+    }
+    
+    Retorna:
+      { id, identifier, name, groupCode }
+    """
+    try:
+        data = request.json
+        identificador = data.get("identificador_estudiante")
+        nombre = data.get("nombre_anonimo")
+        codigo_grupo = data.get("codigo_grupo")
+        
+        # Validar campos requeridos
+        if not identificador or not nombre or not codigo_grupo:
+            return jsonify({
+                "status": "error",
+                "message": "Los campos identificador_estudiante, nombre_anonimo y codigo_grupo son requeridos"
+            }), 400
+        
+        # Obtener el grupo_id desde la tabla grupos
+        grupo_check = supabase.table("grupos").select("id").eq("codigo_grupo", codigo_grupo).single().execute()
+        if not grupo_check.data:
+            return jsonify({
+                "status": "error",
+                "message": f"El grupo '{codigo_grupo}' no existe"
+            }), 404
+        
+        grupo_id = grupo_check.data.get("id")
+        
+        # Validar que el estudiante no exista ya
+        existing = supabase.table("estudiantes").select("id").eq("identificador_estudiante", identificador).execute()
+        if existing.data and len(existing.data) > 0:
+            return jsonify({
+                "status": "error",
+                "message": f"El estudiante con identificador '{identificador}' ya existe"
+            }), 409
+        
+        # Crear nuevo estudiante en Supabase con el grupo_id
+        new_student_data = {
+            "identificador_estudiante": identificador,
+            "nombre_anonimo": nombre,
+            "codigo_grupo": codigo_grupo,
+            "grupo_id": grupo_id
+        }
+        
+        result = supabase.table("estudiantes").insert(new_student_data).execute()
+        
+        if not result.data or len(result.data) == 0:
+            return jsonify({
+                "status": "error",
+                "message": "No se pudo crear el estudiante"
+            }), 500
+        
+        # Transformar la respuesta
+        estudiante_creado = result.data[0]
+        estudiante_respuesta = {
+            "id": estudiante_creado.get("id"),
+            "identifier": estudiante_creado.get("identificador_estudiante", ""),
+            "name": estudiante_creado.get("nombre_anonimo", ""),
+            "groupCode": estudiante_creado.get("codigo_grupo", "")
+        }
+        
+        return jsonify({
+            "status": "success",
+            "message": "Estudiante creado correctamente",
+            "data": estudiante_respuesta
+        }), 201
+    
+    except Exception as e:
+        print(f"Error en create_student: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/teacher/update-momento', methods=['POST'])
 @require_auth

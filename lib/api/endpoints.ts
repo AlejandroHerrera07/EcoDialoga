@@ -20,5 +20,7 @@ export const API_ENDPOINTS = {
   TEACHER_METRICS: "/teacher/metrics",
   TEACHER_RECENT_MESSAGES: "/teacher/recent-messages",
   TEACHER_GROUPS: "/teacher/groups",
+  TEACHER_GROUPS_CREATE: "/grupos",
+  TEACHER_STUDENTS: "/teacher/students",
   TEACHER_UPDATE_MOMENTO: "/teacher/update-momento",
 } as const;
